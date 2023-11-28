@@ -21,7 +21,7 @@ export function registerSettings() {
             scope: "world",
             config: true,
             type: Boolean,
-            default: true,
+            default: false,
             onChange: (sett) => {
                 ui.ARGON.constructor.SW5E.mainBarFeatures = ui.ARGON.constructor.SW5E.mainBarFeatures.filter(i => i !== "class");
                 if(sett) ui.ARGON.constructor.SW5E.mainBarFeatures.push("class");
