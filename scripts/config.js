@@ -917,8 +917,7 @@ export function initConfig() {
         }
 
         class SW5eMovementHud extends ARGON.MovementHud {
-
-            constructor (...args) {
+            constructor(...args) {
                 super(...args);
                 this.getMovementMode = game.modules.get('elevation-drag-ruler')?.api?.getMovementMode;
             }
