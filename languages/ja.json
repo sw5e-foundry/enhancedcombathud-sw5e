@@ -1,5 +1,5 @@
 {
-  "enhancedcombathud-dnd5e": {
+  "enhancedcombathud-sw5e": {
     "settings": {
       "switchEquip": {
         "name": "自動装備",
@@ -41,7 +41,7 @@
       "mainactions": {
         "name": "アクション"
       },
-      "castspell": {
+      "castpower": {
         "name": "呪文発動"
       },
       "usepower": {
@@ -86,7 +86,7 @@
       "tools": {
         "name": "道具"
       },
-      "spells": {
+      "powers": {
         "cantrip": "初級呪文",
         "pact": "契約呪文",
         "will": "常時発動可能",
