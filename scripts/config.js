@@ -16,7 +16,7 @@ export function initConfig() {
         };
 
         const itemTypes = {
-            power: ["power"],
+            power: ["power", "maneuver"],
             feat: ["feat"],
             consumable: ["consumable", "equipment", "loot"],
         };
@@ -66,7 +66,7 @@ export function initConfig() {
                         properties.push(CONFIG.SW5E.itemActionTypes[item.system.actionType]);
                         for (let [key, value] of Object.entries(item.system.properties)) {
                             let prop = value && CONFIG.SW5E.weaponProperties[key] ? CONFIG.SW5E.weaponProperties[key] : undefined;
-                            if (prop) properties.push(prop);
+                            if (prop) properties.push(prop.name);
                         }
                         break;
                     case "power":
@@ -438,6 +438,7 @@ export function initConfig() {
 
             async _getButtons() {
                 const powerItems = this.actor.items.filter((item) => itemTypes.power.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
+                const maneuverItems = this.actor.items.filter((item) => itemTypes.maneuver.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
                 const featItems = this.actor.items.filter((item) => itemTypes.feat.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
                 const consumableItems = this.actor.items.filter((item) => itemTypes.consumable.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
 
@@ -445,7 +446,25 @@ export function initConfig() {
 
                 const showSpecialActions = game.settings.get(MODULE_ID, "showSpecialActions");
 
-                const buttons = [new SW5eItemButton({ item: null, isWeaponSet: true, isPrimary: true }), new ARGON.MAIN.BUTTONS.SplitButton(new SW5eSpecialActionButton(specialActions[0]), new SW5eSpecialActionButton(specialActions[1])), new SW5eButtonPanelButton({ type: "power", items: powerItems, color: 0 }), new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 }), new ARGON.MAIN.BUTTONS.SplitButton(new SW5eSpecialActionButton(specialActions[2]), new SW5eSpecialActionButton(specialActions[3])), new ARGON.MAIN.BUTTONS.SplitButton(new SW5eSpecialActionButton(specialActions[4]), new SW5eSpecialActionButton(specialActions[5])), new SW5eButtonPanelButton({ type: "consumable", items: consumableItems, color: 0 })];
+                const buttons = [
+                    new SW5eItemButton({ item: null, isWeaponSet: true, isPrimary: true }),
+                    new ARGON.MAIN.BUTTONS.SplitButton(
+                        new SW5eSpecialActionButton(specialActions[0]),
+                        new SW5eSpecialActionButton(specialActions[1])
+                    ),
+                    new SW5eButtonPanelButton({ type: "power", items: powerItems, color: 0 }),
+                    new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 }),
+                    new ARGON.MAIN.BUTTONS.SplitButton(
+                        new SW5eSpecialActionButton(specialActions[2]),
+                        new SW5eSpecialActionButton(specialActions[3])
+                    ),
+                    new ARGON.MAIN.BUTTONS.SplitButton(
+                        new SW5eSpecialActionButton(specialActions[4]),
+                        new SW5eSpecialActionButton(specialActions[5])
+                    ),
+                    new SW5eButtonPanelButton({ type: "consumable", items: consumableItems, color: 0 })
+                ];
+
                 const barItems = this.actor.items.filter((item) => CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.action.includes(item.system.activation?.type));
                 for (const item of barItems) {
                     buttons.push(new SW5eItemButton({ item, inActionPanel: true }));
@@ -760,8 +779,10 @@ export function initConfig() {
                 switch (this.type) {
                     case "power":
                         return "enhancedcombathud-sw5e.hud.castpower.name";
+                    case "maneuver":
+                        return "enhancedcombathud-sw5e.hud.usemaneuver.name";
                     case "feat":
-                        return "enhancedcombathud-sw5e.hud.usepower.name";
+                        return "enhancedcombathud-sw5e.hud.usefeature.name";
                     case "consumable":
                         return "enhancedcombathud-sw5e.hud.useitem.name";
                 }
@@ -771,18 +792,13 @@ export function initConfig() {
                 switch (this.type) {
                     case "power":
                         return "modules/enhancedcombathud/icons/spell-book.webp";
+                    case "maneuver":
+                        return "modules/enhancedcombathud/icons/mighty-force.webp";
                     case "feat":
                         return "modules/enhancedcombathud/icons/mighty-force.webp";
                     case "consumable":
                         return "modules/enhancedcombathud/icons/drink-me.webp";
                 }
-            }
-
-            get showPreparedOnly() {
-                if (this.actor.type !== "character") return false;
-                const classes = Object.keys(this.actor.classes);
-                const requiresPreparation = ["cleric", "druid", "paladin", "wizard", "artificer", "ranger"].some((className) => classes.includes(className));
-                return requiresPreparation;
             }
 
             async _getPanel() {
@@ -965,6 +981,98 @@ export function initConfig() {
 }
 
 function registerItems() {
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.dash.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.dash.name"),
+        type: "feat",
+        img: "modules/enhancedcombathud/icons/walking-boot.svg",
+        system: {
+            description: {
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.dash.desc"),
+                chat: "",
+                unidentified: "",
+            },
+            source: "",
+            quantity: 1,
+            weight: 0,
+            price: 0,
+            attuned: false,
+            attunement: 0,
+            equipped: false,
+            rarity: "",
+            identified: true,
+            activation: {
+                type: "action",
+                cost: 1,
+                condition: "",
+            },
+            duration: {
+                value: null,
+                units: "",
+            },
+            target: {
+                value: null,
+                width: null,
+                units: "",
+                type: "self",
+            },
+            range: {
+                value: null,
+                long: null,
+                units: "",
+            },
+
+            consume: {
+                type: "",
+                target: "",
+                amount: null,
+            },
+            ability: "",
+            actionType: "util",
+            attackBonus: 0,
+            chatFlavor: "",
+            critical: null,
+            damage: {
+                parts: [],
+                versatile: "",
+            },
+            formula: "",
+            save: {
+                ability: "",
+                dc: null,
+                scaling: "power",
+            },
+            consumableType: "trinket",
+        },
+        effects: [
+            {
+                _id: "PPMPZY1t3AUB7UGA",
+                changes: [],
+                disabled: false,
+                duration: {
+                    startTime: null,
+                    rounds: 1,
+                },
+                icon: "modules/enhancedcombathud/icons/walking-boot.svg",
+                label: "Dash",
+                transfer: false,
+                flags: {
+                    dae: {
+                        stackable: "none",
+                        macroRepeat: "none",
+                        specialDuration: [],
+                        transfer: false,
+                    },
+                },
+                tint: "",
+            },
+        ],
+        sort: 0,
+        flags: {
+            "midi-qol": {
+                onUseMacroName: "",
+            },
+        },
+    };
     ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.disengage.name")] = {
         name: game.i18n.localize("enhancedcombathud-sw5e.items.disengage.name"),
         type: "feat",
@@ -1125,7 +1233,17 @@ function registerItems() {
         effects: [
             {
                 _id: "2xH2YQ6pm430O0Aq",
-                changes: [],
+                changes: [
+                    {
+                        key: "flags.sw5e.grants.disadvantage.attack.all",
+                        mode: 5,
+                        value: "1"
+                    }, {
+                        key: "flags.sw5e.advantage.ability.save.dex",
+                        mode: 5,
+                        value: "1"
+                    }
+                ],
                 disabled: false,
                 duration: {
                     startTime: null,
@@ -1134,98 +1252,6 @@ function registerItems() {
                 icon: "modules/enhancedcombathud/icons/armor-upgrade.webp",
                 label: "Dodge",
                 origin: "Item.pakEYcgLYxtKGv7J",
-                transfer: false,
-                flags: {
-                    dae: {
-                        stackable: "none",
-                        macroRepeat: "none",
-                        specialDuration: [],
-                        transfer: false,
-                    },
-                },
-                tint: "",
-            },
-        ],
-        sort: 0,
-        flags: {
-            "midi-qol": {
-                onUseMacroName: "",
-            },
-        },
-    };
-    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.ready.name")] = {
-        name: game.i18n.localize("enhancedcombathud-sw5e.items.ready.name"),
-        type: "feat",
-        img: "modules/enhancedcombathud/icons/clockwork.webp",
-        system: {
-            description: {
-                value: game.i18n.localize("enhancedcombathud-sw5e.items.ready.desc"),
-                chat: "",
-                unidentified: "",
-            },
-            source: "",
-            quantity: 1,
-            weight: 0,
-            price: 0,
-            attuned: false,
-            attunement: 0,
-            equipped: false,
-            rarity: "",
-            identified: true,
-            activation: {
-                type: "action",
-                cost: 1,
-                condition: "",
-            },
-            duration: {
-                value: null,
-                units: "",
-            },
-            target: {
-                value: null,
-                width: null,
-                units: "",
-                type: "self",
-            },
-            range: {
-                value: null,
-                long: null,
-                units: "",
-            },
-
-            consume: {
-                type: "",
-                target: "",
-                amount: null,
-            },
-            ability: "",
-            actionType: "util",
-            attackBonus: 0,
-            chatFlavor: "",
-            critical: null,
-            damage: {
-                parts: [],
-                versatile: "",
-            },
-            formula: "",
-            save: {
-                ability: "",
-                dc: null,
-                scaling: "power",
-            },
-            consumableType: "trinket",
-        },
-        effects: [
-            {
-                _id: "BevDb0J80M9BdoEl",
-                changes: [],
-                disabled: false,
-                duration: {
-                    startTime: null,
-                    turns: 1,
-                },
-                icon: "modules/enhancedcombathud/icons/clockwork.webp",
-                label: "Ready",
                 transfer: false,
                 flags: {
                     dae: {
@@ -1341,13 +1367,349 @@ function registerItems() {
             },
         },
     };
-    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.dash.name")] = {
-        name: game.i18n.localize("enhancedcombathud-sw5e.items.dash.name"),
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.grapple.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.grapple.name"),
         type: "feat",
-        img: "modules/enhancedcombathud/icons/walking-boot.webp",
+        img: "modules/enhancedcombathud/icons/cloak-dagger.svg",
         system: {
             description: {
-                value: game.i18n.localize("enhancedcombathud-sw5e.items.dash.desc"),
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.grapple.desc"),
+                chat: "",
+                unidentified: "",
+            },
+            source: "",
+            quantity: 1,
+            weight: 0,
+            price: 0,
+            attuned: false,
+            attunement: 0,
+            equipped: false,
+            rarity: "",
+            identified: true,
+            activation: {
+                type: "action",
+                cost: 1,
+                condition: "",
+            },
+            duration: {
+                value: null,
+                units: "",
+            },
+            target: {
+                value: 1,
+                width: null,
+                units: "",
+                type: "creature",
+            },
+            range: {
+                value: null,
+                long: null,
+                units: "touch",
+            },
+
+            consume: {
+                type: "",
+                target: "",
+                amount: null,
+            },
+            ability: "",
+            actionType: "util",
+            attackBonus: 0,
+            chatFlavor: "",
+            critical: null,
+            damage: {
+                parts: [],
+                versatile: "",
+            },
+            formula: "",
+            save: {
+                ability: "",
+                dc: null,
+                scaling: "power",
+            },
+            consumableType: "trinket",
+        },
+        effects: [],
+        sort: 0,
+        flags: {
+            "midi-qol": {
+                onUseMacroName: "",
+            },
+        },
+    };
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.shove.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.shove.name"),
+        type: "feat",
+        img: "modules/enhancedcombathud/icons/shield-bash.webp",
+        system: {
+            description: {
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.shove.desc"),
+                chat: "",
+                unidentified: "",
+            },
+            source: "",
+            quantity: 1,
+            weight: 0,
+            price: 0,
+            attuned: false,
+            attunement: 0,
+            equipped: false,
+            rarity: "",
+            identified: true,
+            activation: {
+                type: "action",
+                cost: 1,
+                condition: "",
+            },
+            duration: {
+                value: null,
+                units: "",
+            },
+            target: {
+                value: 1,
+                width: null,
+                units: "",
+                type: "creature",
+            },
+            range: {
+                value: null,
+                long: null,
+                units: "touch",
+            },
+
+            consume: {
+                type: "",
+                target: "",
+                amount: null,
+            },
+            ability: "",
+            actionType: "util",
+            attackBonus: 0,
+            chatFlavor: "",
+            critical: null,
+            damage: {
+                parts: [],
+                versatile: "",
+            },
+            formula: "",
+            save: {
+                ability: "",
+                dc: null,
+                scaling: "power",
+            },
+            consumableType: "trinket",
+        },
+        effects: [],
+        sort: 0,
+        flags: {
+            "midi-qol": {
+                onUseMacroName: "",
+            },
+        },
+    };
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.guard.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.guard.name"),
+        type: "feat",
+        img: "modules/enhancedcombathud/icons/clockwork.svg",
+        system: {
+            description: {
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.guard.desc"),
+                chat: "",
+                unidentified: "",
+            },
+            source: "",
+            quantity: 1,
+            weight: 0,
+            price: 0,
+            attuned: false,
+            attunement: 0,
+            equipped: false,
+            rarity: "",
+            identified: true,
+            activation: {
+                type: "action",
+                cost: 1,
+                condition: "",
+            },
+            duration: {
+                value: null,
+                units: "",
+            },
+            target: {
+                value: 1,
+                width: null,
+                units: "",
+                type: "ally",
+            },
+            range: {
+                value: null,
+                long: null,
+                units: "touch",
+            },
+
+            consume: {
+                type: "",
+                target: "",
+                amount: null,
+            },
+            ability: "",
+            actionType: "util",
+            attackBonus: 0,
+            chatFlavor: "",
+            critical: null,
+            damage: {
+                parts: [],
+                versatile: "",
+            },
+            formula: "",
+            save: {
+                ability: "",
+                dc: null,
+                scaling: "power",
+            },
+            consumableType: "trinket",
+        },
+        effects: [
+            {
+                _id: "Hl2vvhBqqpvmuont",
+                changes: [
+                    {
+                        key: "flags.sw5e.grants.disadvantage.attack.all",
+                        mode: 5,
+                        value: "1"
+                    }
+                ],
+                disabled: false,
+                duration: {
+                    startTime: null,
+                    turns: 1,
+                },
+                icon: "modules/enhancedcombathud/icons/clockwork.svg",
+                label: "Guarded",
+                transfer: false,
+                flags: {
+                    dae: {
+                        stackable: "none",
+                        macroRepeat: "none",
+                        specialDuration: [],
+                        transfer: false,
+                    },
+                },
+                tint: "",
+            },
+        ],
+        sort: 0,
+        flags: {
+            "midi-qol": {
+                onUseMacroName: "",
+            },
+        },
+    };
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.help.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.help.name"),
+        type: "feat",
+        img: "modules/enhancedcombathud/icons/clockwork.svg",
+        system: {
+            description: {
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.help.desc"),
+                chat: "",
+                unidentified: "",
+            },
+            source: "",
+            quantity: 1,
+            weight: 0,
+            price: 0,
+            attuned: false,
+            attunement: 0,
+            equipped: false,
+            rarity: "",
+            identified: true,
+            activation: {
+                type: "action",
+                cost: 1,
+                condition: "",
+            },
+            duration: {
+                value: null,
+                units: "",
+            },
+            target: {
+                value: 1,
+                width: null,
+                units: "",
+                type: "ally",
+            },
+            range: {
+                value: null,
+                long: null,
+                units: "touch",
+            },
+
+            consume: {
+                type: "",
+                target: "",
+                amount: null,
+            },
+            ability: "",
+            actionType: "util",
+            attackBonus: 0,
+            chatFlavor: "",
+            critical: null,
+            damage: {
+                parts: [],
+                versatile: "",
+            },
+            formula: "",
+            save: {
+                ability: "",
+                dc: null,
+                scaling: "power",
+            },
+            consumableType: "trinket",
+        },
+        effects: [
+            {
+                _id: "VQnlT5waDLtOPJLF",
+                changes: [
+                    {
+                        key: "flags.sw5e.situational.advantage.all",
+                        mode: 5,
+                        value: "1"
+                    }
+                ],
+                disabled: false,
+                duration: {
+                    startTime: null,
+                    turns: 1,
+                },
+                icon: "modules/enhancedcombathud/icons/clockwork.svg",
+                label: "Helped",
+                transfer: false,
+                flags: {
+                    dae: {
+                        stackable: "none",
+                        macroRepeat: "none",
+                        specialDuration: [],
+                        transfer: false,
+                    },
+                },
+                tint: "",
+            },
+        ],
+        sort: 0,
+        flags: {
+            "midi-qol": {
+                onUseMacroName: "",
+            },
+        },
+    };
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.ready.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.ready.name"),
+        type: "feat",
+        img: "modules/enhancedcombathud/icons/clockwork.svg",
+        system: {
+            description: {
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.ready.desc"),
                 chat: "",
                 unidentified: "",
             },
@@ -1405,15 +1767,15 @@ function registerItems() {
         },
         effects: [
             {
-                _id: "PPMPZY1t3AUB7UGA",
+                _id: "BevDb0J80M9BdoEl",
                 changes: [],
                 disabled: false,
                 duration: {
                     startTime: null,
-                    rounds: 1,
+                    turns: 1,
                 },
-                icon: "modules/enhancedcombathud/icons/walking-boot.webp",
-                label: "Dash",
+                icon: "modules/enhancedcombathud/icons/clockwork.svg",
+                label: "Ready",
                 transfer: false,
                 flags: {
                     dae: {
@@ -1433,13 +1795,13 @@ function registerItems() {
             },
         },
     };
-    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.shove.name")] = {
-        name: game.i18n.localize("enhancedcombathud-sw5e.items.shove.name"),
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.search.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.search.name"),
         type: "feat",
-        img: "modules/enhancedcombathud/icons/shield-bash.webp",
+        img: "modules/enhancedcombathud/icons/clockwork.svg",
         system: {
             description: {
-                value: game.i18n.localize("enhancedcombathud-sw5e.items.shove.desc"),
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.search.desc"),
                 chat: "",
                 unidentified: "",
             },
@@ -1462,15 +1824,15 @@ function registerItems() {
                 units: "",
             },
             target: {
-                value: 1,
+                value: null,
                 width: null,
                 units: "",
-                type: "creature",
+                type: "self",
             },
             range: {
                 value: null,
                 long: null,
-                units: "touch",
+                units: "",
             },
 
             consume: {
