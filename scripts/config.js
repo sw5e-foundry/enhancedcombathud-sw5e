@@ -17,7 +17,8 @@ export function initConfig() {
         };
 
         const itemTypes = {
-            power: ["power", "maneuver"],
+            power: ["power"],
+            maneuver: ["maneuver"],
             feat: ["feat"],
             consumable: ["consumable", "equipment", "loot"],
         };
@@ -215,7 +216,7 @@ export function initConfig() {
                     const classes = Object.values(actor.classes)
                         .map((c) => c.name)
                         .join(" / ");
-                    return `Level ${system.details.level} ${classes} (${system.details.race})`;
+                    return `Level ${system.details.level} ${classes} (${system.details.species})`;
                 } else {
                     return "";
                 }
@@ -256,7 +257,6 @@ export function initConfig() {
                     .split(" ")
                     .map((word) => word.charAt(0).toUpperCase())
                     .join("");
-                const PowerDC = game.i18n.localize("SW5E.SaveDC").replace("{ability}", "").replace("{dc}", "").trim();
 
                 const hpColor = this.actor.system.attributes.hp.temp ? "#6698f3" : "rgb(0 255 170)";
                 const tempMax = this.actor.system.attributes.hp.tempmax;
@@ -285,15 +285,6 @@ export function initConfig() {
                         },
                         {
                             text: this.actor.system.attributes.ac.value,
-                            color: "var(--ech-movement-baseMovement-background)",
-                        },
-                    ],
-                    [
-                        {
-                            text: PowerDC,
-                        },
-                        {
-                            text: this.actor.system.attributes.powerdc,
                             color: "var(--ech-movement-baseMovement-background)",
                         },
                     ],
@@ -477,27 +468,20 @@ export function initConfig() {
                 const specialActions = Object.values(ECHItems);
 
                 const showSpecialActions = game.settings.get(MODULE_ID, "showSpecialActions");
+                const makeSpecialActionButton = (idx => new SW5eSpecialActionButton(specialActions[idx]));
+                const makeSpecialActionButtons = (indexes => new ARGON.MAIN.BUTTONS.SplitButton(indexes.map(makeSpecialActionButton)));
                 const buttons = [];
+
                 buttons.push(new SW5eItemButton({ item: null, isWeaponSet: true, isPrimary: true }));
-                if (showSpecialActions) buttons.push(new ARGON.MAIN.BUTTONS.SplitButton(
-                    new SW5eSpecialActionButton(specialActions[0]),
-                    new SW5eSpecialActionButton(specialActions[1]),
-                ));
-                buttons.push(
-                    ...powerButton,
-                    new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 },
-                );
-                if (showSpecialActions) buttons.push(...[
-                    new ARGON.MAIN.BUTTONS.SplitButton(
-                        new SW5eSpecialActionButton(specialActions[2]),
-                        new SW5eSpecialActionButton(specialActions[3]),
-                    ),
-                    new ARGON.MAIN.BUTTONS.SplitButton(
-                        new SW5eSpecialActionButton(specialActions[4]),
-                        new SW5eSpecialActionButton(specialActions[5]),
-                    ),
-                ]);
+                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([0, 1]));
+                buttons.push(...powerButton);
+                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([2, 3]));
+                buttons.push(new SW5eButtonPanelButton({ type: "maneuver", items: maneuverItems, color: 0 }));
+                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([4, 5]));
+                buttons.push(new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 });
+                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([6, 7]));
                 buttons.push(new SW5eButtonPanelButton({ type: "consumable", items: consumableItems, color: 0 }));
+                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([8, 9]));
 
                 const barItems = this.actor.items.filter((item) => CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.action.includes(item.system.activation?.type));
                 buttons.push(...condenseItemButtons(barItems));
@@ -723,6 +707,7 @@ export function initConfig() {
                 const used = await this.item.use({ event }, { event });
                 if (used) {
                     SW5eItemButton.consumeActionEconomy(this.item);
+                    if (this.item.type === "maneuver") this.parent?.parent?.render();
                 }
             }
 
@@ -826,7 +811,7 @@ export function initConfig() {
                     case "power":
                         return "modules/enhancedcombathud/icons/spell-book.webp";
                     case "maneuver":
-                        return "modules/enhancedcombathud/icons/mighty-force.webp";
+                        return "modules/enhancedcombathud-sw5e/icons/acrobatic.webp";
                     case "feat":
                         return "modules/enhancedcombathud/icons/mighty-force.webp";
                     case "consumable":
@@ -933,6 +918,22 @@ export function initConfig() {
                 } else {
                     return new ARGON.MAIN.BUTTON_PANELS.ButtonPanel({ id: this.id, buttons: this.items.map((item) => new SW5eItemButton({ item })) });
                 }
+            }
+
+            async _renderInner() {
+                await super._renderInner();
+                if(Number.isNumeric(this.quantity)) {
+                    this.element.classList.add("has-count");
+                    this.element.dataset.itemCount = this.quantity;
+                }
+            }
+
+            get quantity() {
+                if (this.type === "maneuver") {
+                    const superiorityDice = this?.actor?.system?.scale?.superiority?.dice;
+                    return superiorityDice.value;
+                }
+                return null;
             }
         }
 
@@ -1092,7 +1093,7 @@ function registerItems() {
     ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.dash.name")] = {
         name: game.i18n.localize("enhancedcombathud-sw5e.items.dash.name"),
         type: "feat",
-        img: "modules/enhancedcombathud/icons/walking-boot.svg",
+        img: "modules/enhancedcombathud/icons/walking-boot.webp",
         system: {
             description: {
                 value: game.i18n.localize("enhancedcombathud-sw5e.items.dash.desc"),
@@ -1160,7 +1161,7 @@ function registerItems() {
                     startTime: null,
                     rounds: 1,
                 },
-                icon: "modules/enhancedcombathud/icons/walking-boot.svg",
+                icon: "modules/enhancedcombathud/icons/walking-boot.webp",
                 label: "Dash",
                 transfer: false,
                 flags: {
@@ -1478,7 +1479,7 @@ function registerItems() {
     ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.grapple.name")] = {
         name: game.i18n.localize("enhancedcombathud-sw5e.items.grapple.name"),
         type: "feat",
-        img: "modules/enhancedcombathud/icons/cloak-dagger.svg",
+        img: "modules/enhancedcombathud-sw5e/icons/grab.webp",
         system: {
             description: {
                 value: game.i18n.localize("enhancedcombathud-sw5e.items.grapple.desc"),
@@ -1618,7 +1619,7 @@ function registerItems() {
     ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.guard.name")] = {
         name: game.i18n.localize("enhancedcombathud-sw5e.items.guard.name"),
         type: "feat",
-        img: "modules/enhancedcombathud/icons/clockwork.svg",
+        img: "modules/enhancedcombathud-sw5e/icons/shield-reflect.webp",
         system: {
             description: {
                 value: game.i18n.localize("enhancedcombathud-sw5e.items.guard.desc"),
@@ -1692,7 +1693,7 @@ function registerItems() {
                     startTime: null,
                     turns: 1,
                 },
-                icon: "modules/enhancedcombathud/icons/clockwork.svg",
+                icon: "modules/enhancedcombathud/icons/clockwork.webp",
                 label: "Guarded",
                 transfer: false,
                 flags: {
@@ -1716,7 +1717,7 @@ function registerItems() {
     ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.help.name")] = {
         name: game.i18n.localize("enhancedcombathud-sw5e.items.help.name"),
         type: "feat",
-        img: "modules/enhancedcombathud/icons/clockwork.svg",
+        img: "modules/enhancedcombathud-sw5e/icons/team-idea.webp",
         system: {
             description: {
                 value: game.i18n.localize("enhancedcombathud-sw5e.items.help.desc"),
@@ -1790,7 +1791,7 @@ function registerItems() {
                     startTime: null,
                     turns: 1,
                 },
-                icon: "modules/enhancedcombathud/icons/clockwork.svg",
+                icon: "modules/enhancedcombathud/icons/clockwork.webp",
                 label: "Helped",
                 transfer: false,
                 flags: {
@@ -1814,7 +1815,7 @@ function registerItems() {
     ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.ready.name")] = {
         name: game.i18n.localize("enhancedcombathud-sw5e.items.ready.name"),
         type: "feat",
-        img: "modules/enhancedcombathud/icons/clockwork.svg",
+        img: "modules/enhancedcombathud/icons/clockwork.webp",
         system: {
             description: {
                 value: game.i18n.localize("enhancedcombathud-sw5e.items.ready.desc"),
@@ -1882,7 +1883,7 @@ function registerItems() {
                     startTime: null,
                     turns: 1,
                 },
-                icon: "modules/enhancedcombathud/icons/clockwork.svg",
+                icon: "modules/enhancedcombathud/icons/clockwork.webp",
                 label: "Ready",
                 transfer: false,
                 flags: {
@@ -1906,7 +1907,7 @@ function registerItems() {
     ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.search.name")] = {
         name: game.i18n.localize("enhancedcombathud-sw5e.items.search.name"),
         type: "feat",
-        img: "modules/enhancedcombathud/icons/clockwork.svg",
+        img: "modules/enhancedcombathud-sw5e/icons/magnifying-glass.webp",
         system: {
             description: {
                 value: game.i18n.localize("enhancedcombathud-sw5e.items.search.desc"),
