@@ -1,7 +1,7 @@
 {
-  "title": "Argon - Combat HUD (DND5E)",
-  "description": "DnD5e - Fifth Edition System Argon integration",
-  "id": "enhancedcombathud-dnd5e",
+  "title": "Argon - Combat HUD (SW5E)",
+  "description": "SW5e - Fifth Edition System Argon integration",
+  "id": "enhancedcombathud-sw5e",
   "version": "1.0",
   "authors": [
     {
@@ -75,9 +75,9 @@
     "styles/module.css"
   ],
   "packs": [],
-  "url": "https://github.com/theripper93/enhancedcombathud-dnd5e",
-  "manifest": "https://github.com/theripper93/enhancedcombathud-dnd5e/releases/latest/download/module.json",
-  "download": "https://github.com/theripper93/enhancedcombathud-dnd5e/releases/download/0.9.7.3/module.zip",
+  "url": "https://github.com/theripper93/enhancedcombathud-sw5e",
+  "manifest": "https://github.com/theripper93/enhancedcombathud-sw5e/releases/latest/download/module.json",
+  "download": "https://github.com/theripper93/enhancedcombathud-sw5e/releases/download/0.9.7.3/module.zip",
   "relationships": {
     "requires": [
       {
@@ -88,7 +88,7 @@
     ],
     "systems": [
       {
-        "id": "dnd5e",
+        "id": "sw5e",
         "type": "system",
         "compatibility": {}
       }

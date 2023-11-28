@@ -1,5 +1,5 @@
-# Argon - Combat HUD (DND5E)
-DnD5e - Fifth Edition System Argon integration
+# Argon - Combat HUD (SW5E)
+SW5e - Fifth Edition System Argon integration
 
 ## Before opening an issue read [THIS](https://github.com/theripper93/Levels/blob/v9/ISSUES.md)
 
@@ -7,8 +7,8 @@ DnD5e - Fifth Edition System Argon integration
 
 ## You can find the documentation on the [WIKI](https://api.theripper93.com/modulewiki/enhancedcombathud/free)
 
-This module is the DND5E Implementation of Argon Combat HUD, The Argon Combat HUD (CORE) is required for this module to work.
+This module is the SW5E Implementation of Argon Combat HUD, The Argon Combat HUD (CORE) is required for this module to work.
 This is the only system integration directly developed by me.
 
-![image](https://github.com/theripper93/enhancedcombathud-dnd5e/assets/1346839/3d49d583-d98e-43e3-8182-681d9ba32c77)
+![image](https://github.com/theripper93/enhancedcombathud-sw5e/assets/1346839/3d49d583-d98e-43e3-8182-681d9ba32c77)
 
