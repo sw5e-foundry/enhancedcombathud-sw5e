@@ -446,7 +446,6 @@ export function initConfig() {
                 const showSpecialActions = game.settings.get(MODULE_ID, "showSpecialActions");
 
                 const buttons = [new SW5eItemButton({ item: null, isWeaponSet: true, isPrimary: true }), new ARGON.MAIN.BUTTONS.SplitButton(new SW5eSpecialActionButton(specialActions[0]), new SW5eSpecialActionButton(specialActions[1])), new SW5eButtonPanelButton({ type: "power", items: powerItems, color: 0 }), new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 }), new ARGON.MAIN.BUTTONS.SplitButton(new SW5eSpecialActionButton(specialActions[2]), new SW5eSpecialActionButton(specialActions[3])), new ARGON.MAIN.BUTTONS.SplitButton(new SW5eSpecialActionButton(specialActions[4]), new SW5eSpecialActionButton(specialActions[5])), new SW5eButtonPanelButton({ type: "consumable", items: consumableItems, color: 0 })];
-
                 const barItems = this.actor.items.filter((item) => CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.action.includes(item.system.activation?.type));
                 for (const item of barItems) {
                     buttons.push(new SW5eItemButton({ item, inActionPanel: true }));
