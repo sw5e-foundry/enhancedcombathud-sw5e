@@ -1,5 +1,5 @@
 {
-  "enhancedcombathud-dnd5e": {
+  "enhancedcombathud-sw5e": {
     "itemconfig": {
       "sets": {
         "text": "Sets d'armes"
@@ -27,7 +27,7 @@
       "mainactions": {
         "name": "Actions principales"
       },
-      "castspell": {
+      "castpower": {
         "name": "Lancer un sort"
       },
       "usepower": {
@@ -72,7 +72,7 @@
       "tools": {
         "name": "Outils"
       },
-      "spells": {
+      "powers": {
         "cantrip": "Sort mineur",
         "pact": "Pacte magique",
         "will": "À volonté",

@@ -1,5 +1,5 @@
 {
-  "enhancedcombathud-dnd5e": {
+  "enhancedcombathud-sw5e": {
     "settings": {
       "switchEquip": {
         "name": "Automatisches Ausrüsten",
@@ -41,7 +41,7 @@
       "mainactions": {
         "name": "Hauptaktion"
       },
-      "castspell": {
+      "castpower": {
         "name": "Zauber wirken"
       },
       "usepower": {
@@ -86,7 +86,7 @@
       "tools": {
         "name": "Werkzeuge"
       },
-      "spells": {
+      "powers": {
         "cantrip": "Zaubertrick",
         "pact": "Paktmagie",
         "will": "Nach Belieben",
