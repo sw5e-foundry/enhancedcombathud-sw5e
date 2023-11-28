@@ -4,7 +4,7 @@ const ECHItems = {};
 
 export function initConfig() {
     Hooks.on("argonInit", (CoreHUD) => {
-        if (game.system.id !== "dnd5e") return;
+        if (game.system.id !== "sw5e") return;
         registerItems();
         const ARGON = CoreHUD.ARGON;
 
@@ -16,7 +16,7 @@ export function initConfig() {
         };
 
         const itemTypes = {
-            spell: ["spell"],
+            power: ["power"],
             feat: ["feat"],
             consumable: ["consumable", "equipment", "loot"],
         };
@@ -26,14 +26,14 @@ export function initConfig() {
         if (game.settings.get(MODULE_ID, "showWeaponsItems")) itemTypes.consumable.push("weapon");
         if (game.settings.get(MODULE_ID, "showClassActions")) mainBarFeatures.push("class");
 
-        CoreHUD.DND5E = {
+        CoreHUD.SW5E = {
             actionTypes,
             itemTypes,
             mainBarFeatures,
             ECHItems,
         };
 
-        Hooks.callAll("enhanced-combat-hud.dnd5e.initConfig", { actionTypes, itemTypes, ECHItems });
+        Hooks.callAll("enhanced-combat-hud.sw5e.initConfig", { actionTypes, itemTypes, ECHItems });
 
         async function getTooltipDetails(item, type) {
             let title, description, itemType, subtitle, target, range, dt;
@@ -42,11 +42,11 @@ export function initConfig() {
             let materialComponents = "";
 
             if (type == "skill") {
-                title = CONFIG.DND5E.skills[item].label;
-                description = game.i18n.localize(`enhancedcombathud-dnd5e.skills.${item}.tooltip`);
+                title = CONFIG.SW5E.skills[item].label;
+                description = game.i18n.localize(`enhancedcombathud-sw5e.skills.${item}.tooltip`);
             } else if (type == "save") {
-                title = CONFIG.DND5E.abilities[item].label;
-                description = game.i18n.localize(`enhancedcombathud-dnd5e.abilities.${item}.tooltip`);
+                title = CONFIG.SW5E.abilities[item].label;
+                description = game.i18n.localize(`enhancedcombathud-sw5e.abilities.${item}.tooltip`);
             } else {
                 if (!item || !item.system) return;
 
@@ -62,16 +62,16 @@ export function initConfig() {
 
                 switch (itemType) {
                     case "weapon":
-                        subtitle = CONFIG.DND5E.weaponTypes[item.system.weaponType];
-                        properties.push(CONFIG.DND5E.itemActionTypes[item.system.actionType]);
+                        subtitle = CONFIG.SW5E.weaponTypes[item.system.weaponType];
+                        properties.push(CONFIG.SW5E.itemActionTypes[item.system.actionType]);
                         for (let [key, value] of Object.entries(item.system.properties)) {
-                            let prop = value && CONFIG.DND5E.weaponProperties[key] ? CONFIG.DND5E.weaponProperties[key] : undefined;
+                            let prop = value && CONFIG.SW5E.weaponProperties[key] ? CONFIG.SW5E.weaponProperties[key] : undefined;
                             if (prop) properties.push(prop);
                         }
                         break;
-                    case "spell":
+                    case "power":
                         subtitle = `${item.labels.level} ${item.labels.school}`;
-                        properties.push(CONFIG.DND5E.spellSchools[item.system.school]);
+                        properties.push(CONFIG.SW5E.powerSchools[item.system.school]);
                         properties.push(item.labels.duration);
                         properties.push(item.labels.save);
                         for (let comp of item.labels.components.all) {
@@ -80,12 +80,12 @@ export function initConfig() {
                         if (item.labels.materials) materialComponents = item.labels.materials;
                         break;
                     case "consumable":
-                        subtitle = CONFIG.DND5E.consumableTypes[item.system.consumableType];
-                        properties.push(CONFIG.DND5E.itemActionTypes[item.system.actionType]);
+                        subtitle = CONFIG.SW5E.consumableTypes[item.system.consumableType];
+                        properties.push(CONFIG.SW5E.itemActionTypes[item.system.actionType]);
                         break;
                     case "feat":
                         subtitle = item.system.requirements;
-                        properties.push(CONFIG.DND5E.itemActionTypes[item.system.actionType]);
+                        properties.push(CONFIG.SW5E.itemActionTypes[item.system.actionType]);
                         break;
                 }
             }
@@ -95,18 +95,18 @@ export function initConfig() {
             if (target || range) {
                 details = [
                     {
-                        label: "enhancedcombathud-dnd5e.tooltip.target.name",
+                        label: "enhancedcombathud-sw5e.tooltip.target.name",
                         value: target,
                     },
                     {
-                        label: "enhancedcombathud-dnd5e.tooltip.range.name",
+                        label: "enhancedcombathud-sw5e.tooltip.range.name",
                         value: range,
                     },
                 ];
             }
             if (item.labels.toHit) {
                 details.push({
-                    label: "enhancedcombathud-dnd5e.tooltip.toHit.name",
+                    label: "enhancedcombathud-sw5e.tooltip.toHit.name",
                     value: item.labels.toHit,
                 });
             }
@@ -116,7 +116,7 @@ export function initConfig() {
                     dmgString += dDmg.formula + " " + getDamageTypeIcon(dDmg.damageType) + " ";
                 });
                 details.push({
-                    label: "enhancedcombathud-dnd5e.tooltip.damage.name",
+                    label: "enhancedcombathud-sw5e.tooltip.damage.name",
                     value: dmgString,
                 });
             }
@@ -171,7 +171,7 @@ export function initConfig() {
             else return '<i style="margin-right: 1ch; pointer-events: none" class="far fa-circle"> </i>';
         }
 
-        class DND5ePortraitPanel extends ARGON.PORTRAIT.PortraitPanel {
+        class SW5ePortraitPanel extends ARGON.PORTRAIT.PortraitPanel {
             constructor(...args) {
                 super(...args);
             }
@@ -182,7 +182,7 @@ export function initConfig() {
                 const isNPC = type === "npc";
                 const isPC = type === "character";
                 if (isNPC) {
-                    const creatureType = game.i18n.localize(CONFIG.DND5E.creatureTypes[actor.system.details.type.value] ?? actor.system.details.type.custom);
+                    const creatureType = game.i18n.localize(CONFIG.SW5E.creatureTypes[actor.system.details.type.value] ?? actor.system.details.type.custom);
                     const cr = system.details.cr >= 1 || system.details.cr <= 0 ? system.details.cr : `1/${1 / system.details.cr}`;
                     return `CR ${cr} ${creatureType}`;
                 } else if (isPC) {
@@ -217,16 +217,16 @@ export function initConfig() {
 
             async getStatBlocks() {
                 const HPText = game.i18n
-                    .localize("DND5E.HitPoints")
+                    .localize("SW5E.HitPoints")
                     .split(" ")
                     .map((word) => word.charAt(0).toUpperCase())
                     .join("");
                 const ACText = game.i18n
-                    .localize("DND5E.ArmorClass")
+                    .localize("SW5E.ArmorClass")
                     .split(" ")
                     .map((word) => word.charAt(0).toUpperCase())
                     .join("");
-                const SpellDC = game.i18n.localize("DND5E.SaveDC").replace("{ability}", "").replace("{dc}", "").trim();
+                const PowerDC = game.i18n.localize("SW5E.SaveDC").replace("{ability}", "").replace("{dc}", "").trim();
 
                 const hpColor = this.actor.system.attributes.hp.temp ? "#6698f3" : "rgb(0 255 170)";
                 const tempMax = this.actor.system.attributes.hp.tempmax;
@@ -260,10 +260,10 @@ export function initConfig() {
                     ],
                     [
                         {
-                            text: SpellDC,
+                            text: PowerDC,
                         },
                         {
-                            text: this.actor.system.attributes.spelldc,
+                            text: this.actor.system.attributes.powerdc,
                             color: "var(--ech-movement-baseMovement-background)",
                         },
                     ],
@@ -271,7 +271,7 @@ export function initConfig() {
             }
         }
 
-        class DND5eDrawerButton extends ARGON.DRAWER.DrawerButton {
+        class SW5eDrawerButton extends ARGON.DRAWER.DrawerButton {
             constructor(buttons, item, type) {
                 super(buttons);
                 this.item = item;
@@ -292,7 +292,7 @@ export function initConfig() {
             }
         }
 
-        class DND5eDrawerPanel extends ARGON.DRAWER.DrawerPanel {
+        class SW5eDrawerPanel extends ARGON.DRAWER.DrawerPanel {
             constructor(...args) {
                 super(...args);
             }
@@ -309,10 +309,10 @@ export function initConfig() {
 
                 const abilitiesButtons = Object.keys(abilities).map((ability) => {
                     const abilityData = abilities[ability];
-                    return new DND5eDrawerButton(
+                    return new SW5eDrawerButton(
                         [
                             {
-                                label: CONFIG.DND5E.abilities[ability].label,
+                                label: CONFIG.SW5E.abilities[ability].label,
                                 onClick: (event) => this.actor.rollAbility(ability, { event }),
                             },
                             {
@@ -331,10 +331,10 @@ export function initConfig() {
 
                 const skillsButtons = Object.keys(skills).map((skill) => {
                     const skillData = skills[skill];
-                    return new DND5eDrawerButton(
+                    return new SW5eDrawerButton(
                         [
                             {
-                                label: getProficiencyIcon(skillData.proficient) + CONFIG.DND5E.skills[skill].label,
+                                label: getProficiencyIcon(skillData.proficient) + CONFIG.SW5E.skills[skill].label,
                                 onClick: (event) => this.actor.rollSkill(skill, { event }),
                             },
                             {
@@ -348,7 +348,7 @@ export function initConfig() {
                 });
 
                 const toolButtons = tools.map((tool) => {
-                    return new DND5eDrawerButton(
+                    return new SW5eDrawerButton(
                         [
                             {
                                 label: getProficiencyIcon(tool.system.proficient) + tool.name,
@@ -410,17 +410,17 @@ export function initConfig() {
             }
 
             get title() {
-                return `${game.i18n.localize("enhancedcombathud-dnd5e.hud.saves.name")} / ${game.i18n.localize("enhancedcombathud-dnd5e.hud.skills.name")} / ${game.i18n.localize("enhancedcombathud-dnd5e.hud.tools.name")}`;
+                return `${game.i18n.localize("enhancedcombathud-sw5e.hud.saves.name")} / ${game.i18n.localize("enhancedcombathud-sw5e.hud.skills.name")} / ${game.i18n.localize("enhancedcombathud-sw5e.hud.tools.name")}`;
             }
         }
 
-        class DND5eActionActionPanel extends ARGON.MAIN.ActionPanel {
+        class SW5eActionActionPanel extends ARGON.MAIN.ActionPanel {
             constructor(...args) {
                 super(...args);
             }
 
             get label() {
-                return "DND5E.Action";
+                return "SW5E.Action";
             }
 
             get maxActions() {
@@ -437,32 +437,32 @@ export function initConfig() {
             }
 
             async _getButtons() {
-                const spellItems = this.actor.items.filter((item) => itemTypes.spell.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value));
-                const featItems = this.actor.items.filter((item) => itemTypes.feat.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value));
-                const consumableItems = this.actor.items.filter((item) => itemTypes.consumable.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value));
+                const powerItems = this.actor.items.filter((item) => itemTypes.power.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
+                const featItems = this.actor.items.filter((item) => itemTypes.feat.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
+                const consumableItems = this.actor.items.filter((item) => itemTypes.consumable.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
 
                 const specialActions = Object.values(ECHItems);
 
                 const showSpecialActions = game.settings.get(MODULE_ID, "showSpecialActions");
 
-                const buttons = [new DND5eItemButton({ item: null, isWeaponSet: true, isPrimary: true }), new ARGON.MAIN.BUTTONS.SplitButton(new DND5eSpecialActionButton(specialActions[0]), new DND5eSpecialActionButton(specialActions[1])), new DND5eButtonPanelButton({ type: "spell", items: spellItems, color: 0 }), new DND5eButtonPanelButton({ type: "feat", items: featItems, color: 0 }), new ARGON.MAIN.BUTTONS.SplitButton(new DND5eSpecialActionButton(specialActions[2]), new DND5eSpecialActionButton(specialActions[3])), new ARGON.MAIN.BUTTONS.SplitButton(new DND5eSpecialActionButton(specialActions[4]), new DND5eSpecialActionButton(specialActions[5])), new DND5eButtonPanelButton({ type: "consumable", items: consumableItems, color: 0 })];
+                const buttons = [new SW5eItemButton({ item: null, isWeaponSet: true, isPrimary: true }), new ARGON.MAIN.BUTTONS.SplitButton(new SW5eSpecialActionButton(specialActions[0]), new SW5eSpecialActionButton(specialActions[1])), new SW5eButtonPanelButton({ type: "power", items: powerItems, color: 0 }), new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 }), new ARGON.MAIN.BUTTONS.SplitButton(new SW5eSpecialActionButton(specialActions[2]), new SW5eSpecialActionButton(specialActions[3])), new ARGON.MAIN.BUTTONS.SplitButton(new SW5eSpecialActionButton(specialActions[4]), new SW5eSpecialActionButton(specialActions[5])), new SW5eButtonPanelButton({ type: "consumable", items: consumableItems, color: 0 })];
 
-                const barItems = this.actor.items.filter((item) => CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.action.includes(item.system.activation?.type));
+                const barItems = this.actor.items.filter((item) => CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.action.includes(item.system.activation?.type));
                 for (const item of barItems) {
-                    buttons.push(new DND5eItemButton({ item, inActionPanel: true }));
+                    buttons.push(new SW5eItemButton({ item, inActionPanel: true }));
                 }
 
                 return buttons.filter((button) => button.items == undefined || button.items.length).filter((button) => showSpecialActions || !(button instanceof ARGON.MAIN.BUTTONS.SplitButton));
             }
         }
 
-        class DND5eBonusActionPanel extends ARGON.MAIN.ActionPanel {
+        class SW5eBonusActionPanel extends ARGON.MAIN.ActionPanel {
             constructor(...args) {
                 super(...args);
             }
 
             get label() {
-                return "DND5E.BonusAction";
+                return "SW5E.BonusAction";
             }
 
             get maxActions() {
@@ -479,29 +479,29 @@ export function initConfig() {
             }
 
             async _getButtons() {
-                const buttons = [new DND5eItemButton({ item: null, isWeaponSet: true, isPrimary: false })];
+                const buttons = [new SW5eItemButton({ item: null, isWeaponSet: true, isPrimary: false })];
                 for (const [type, types] of Object.entries(itemTypes)) {
-                    const items = this.actor.items.filter((item) => types.includes(item.type) && actionTypes.bonus.includes(item.system.activation?.type) && !CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value));
+                    const items = this.actor.items.filter((item) => types.includes(item.type) && actionTypes.bonus.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
                     if (!items.length) continue;
-                    buttons.push(new DND5eButtonPanelButton({ type, items, color: 1 }));
+                    buttons.push(new SW5eButtonPanelButton({ type, items, color: 1 }));
                 }
 
-                const barItems = this.actor.items.filter((item) => CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.bonus.includes(item.system.activation?.type));
+                const barItems = this.actor.items.filter((item) => CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.bonus.includes(item.system.activation?.type));
                 for (const item of barItems) {
-                    buttons.push(new DND5eItemButton({ item, inActionPanel: true }));
+                    buttons.push(new SW5eItemButton({ item, inActionPanel: true }));
                 }
 
                 return buttons;
             }
         }
 
-        class DND5eReactionActionPanel extends ARGON.MAIN.ActionPanel {
+        class SW5eReactionActionPanel extends ARGON.MAIN.ActionPanel {
             constructor(...args) {
                 super(...args);
             }
 
             get label() {
-                return "DND5E.Reaction";
+                return "SW5E.Reaction";
             }
 
             get maxActions() {
@@ -518,30 +518,30 @@ export function initConfig() {
             }
 
             async _getButtons() {
-                const buttons = [new DND5eItemButton({ item: null, isWeaponSet: true, isPrimary: true })];
-                //buttons.push(new DND5eEquipmentButton({slot: 1}));
+                const buttons = [new SW5eItemButton({ item: null, isWeaponSet: true, isPrimary: true })];
+                //buttons.push(new SW5eEquipmentButton({slot: 1}));
                 for (const [type, types] of Object.entries(itemTypes)) {
-                    const items = this.actor.items.filter((item) => types.includes(item.type) && actionTypes.reaction.includes(item.system.activation?.type) && !CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value));
+                    const items = this.actor.items.filter((item) => types.includes(item.type) && actionTypes.reaction.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
                     if (!items.length) continue;
-                    buttons.push(new DND5eButtonPanelButton({ type, items, color: 3 }));
+                    buttons.push(new SW5eButtonPanelButton({ type, items, color: 3 }));
                 }
 
-                const barItems = this.actor.items.filter((item) => CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.reaction.includes(item.system.activation?.type));
+                const barItems = this.actor.items.filter((item) => CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.reaction.includes(item.system.activation?.type));
                 for (const item of barItems) {
-                    buttons.push(new DND5eItemButton({ item, inActionPanel: true }));
+                    buttons.push(new SW5eItemButton({ item, inActionPanel: true }));
                 }
 
                 return buttons;
             }
         }
 
-        class DND5eFreeActionPanel extends ARGON.MAIN.ActionPanel {
+        class SW5eFreeActionPanel extends ARGON.MAIN.ActionPanel {
             constructor(...args) {
                 super(...args);
             }
 
             get label() {
-                return "DND5E.Special";
+                return "SW5E.Special";
             }
 
             get maxActions() {
@@ -561,27 +561,27 @@ export function initConfig() {
                 const buttons = [];
 
                 for (const [type, types] of Object.entries(itemTypes)) {
-                    const items = this.actor.items.filter((item) => types.includes(item.type) && actionTypes.free.includes(item.system.activation?.type) && !CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value));
+                    const items = this.actor.items.filter((item) => types.includes(item.type) && actionTypes.free.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
                     if (!items.length) continue;
-                    buttons.push(new DND5eButtonPanelButton({ type, items, color: 2 }));
+                    buttons.push(new SW5eButtonPanelButton({ type, items, color: 2 }));
                 }
 
-                const barItems = this.actor.items.filter((item) => CoreHUD.DND5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.free.includes(item.system.activation?.type));
+                const barItems = this.actor.items.filter((item) => CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.free.includes(item.system.activation?.type));
                 for (const item of barItems) {
-                    buttons.push(new DND5eItemButton({ item, inActionPanel: true }));
+                    buttons.push(new SW5eItemButton({ item, inActionPanel: true }));
                 }
 
                 return buttons;
             }
         }
 
-        class DND5eLegActionPanel extends ARGON.MAIN.ActionPanel {
+        class SW5eLegActionPanel extends ARGON.MAIN.ActionPanel {
             constructor(...args) {
                 super(...args);
             }
 
             get label() {
-                return "DND5E.LegendaryActionLabel";
+                return "SW5E.LegendaryActionLabel";
             }
 
             get maxActions() {
@@ -596,19 +596,19 @@ export function initConfig() {
                 const buttons = [];
                 const legendary = this.actor.items.filter((item) => item.system.activation?.type === "legendary");
                 legendary.forEach((item) => {
-                    buttons.push(new DND5eItemButton({ item, inActionPanel: true }));
+                    buttons.push(new SW5eItemButton({ item, inActionPanel: true }));
                 });
                 return buttons;
             }
         }
 
-        class DND5eLairActionPanel extends ARGON.MAIN.ActionPanel {
+        class SW5eLairActionPanel extends ARGON.MAIN.ActionPanel {
             constructor(...args) {
                 super(...args);
             }
 
             get label() {
-                return "DND5E.LairActionLabel";
+                return "SW5E.LairActionLabel";
             }
 
             get maxActions() {
@@ -623,13 +623,13 @@ export function initConfig() {
                 const buttons = [];
                 const lair = this.actor.items.filter((item) => item.system.activation?.type === "lair");
                 lair.forEach((item) => {
-                    buttons.push(new DND5eItemButton({ item, inActionPanel: true }));
+                    buttons.push(new SW5eItemButton({ item, inActionPanel: true }));
                 });
                 return buttons;
             }
         }
 
-        class DND5eItemButton extends ARGON.MAIN.BUTTONS.ItemButton {
+        class SW5eItemButton extends ARGON.MAIN.BUTTONS.ItemButton {
             constructor(...args) {
                 super(...args);
             }
@@ -669,7 +669,7 @@ export function initConfig() {
 
             async getTooltipData() {
                 const tooltipData = await getTooltipDetails(this.item);
-                tooltipData.propertiesLabel = "enhancedcombathud-dnd5e.tooltip.properties.name";
+                tooltipData.propertiesLabel = "enhancedcombathud-sw5e.tooltip.properties.name";
                 return tooltipData;
             }
 
@@ -677,7 +677,7 @@ export function initConfig() {
                 ui.ARGON.interceptNextDialog(event.currentTarget);
                 const used = await this.item.use({ event }, { event });
                 if (used) {
-                    DND5eItemButton.consumeActionEconomy(this.item);
+                    SW5eItemButton.consumeActionEconomy(this.item);
                 }
             }
 
@@ -741,7 +741,7 @@ export function initConfig() {
             }
         }
 
-        class DND5eButtonPanelButton extends ARGON.MAIN.BUTTONS.ButtonPanelButton {
+        class SW5eButtonPanelButton extends ARGON.MAIN.BUTTONS.ButtonPanelButton {
             constructor({ type, items, color }) {
                 super();
                 this.type = type;
@@ -759,18 +759,18 @@ export function initConfig() {
 
             get label() {
                 switch (this.type) {
-                    case "spell":
-                        return "enhancedcombathud-dnd5e.hud.castspell.name";
+                    case "power":
+                        return "enhancedcombathud-sw5e.hud.castpower.name";
                     case "feat":
-                        return "enhancedcombathud-dnd5e.hud.usepower.name";
+                        return "enhancedcombathud-sw5e.hud.usepower.name";
                     case "consumable":
-                        return "enhancedcombathud-dnd5e.hud.useitem.name";
+                        return "enhancedcombathud-sw5e.hud.useitem.name";
                 }
             }
 
             get icon() {
                 switch (this.type) {
-                    case "spell":
+                    case "power":
                         return "modules/enhancedcombathud/icons/spell-book.webp";
                     case "feat":
                         return "modules/enhancedcombathud/icons/mighty-force.webp";
@@ -787,23 +787,23 @@ export function initConfig() {
             }
 
             async _getPanel() {
-                if (this.type === "spell") {
-                    const spellLevels = CONFIG.DND5E.spellLevels;
-                    const itemsWithSpells = [];
+                if (this.type === "power") {
+                    const powerLevels = CONFIG.SW5E.powerLevels;
+                    const itemsWithPowers = [];
                     const itemsToIgnore = [];
-                    if (game.modules.get("items-with-spells-5e")?.active) {
+                    if (game.modules.get("items-with-powers-5e")?.active) {
                         const actionType = this.items[0].system.activation?.type;
-                        console.log("items-with-spells-5e");
-                        const spellItems = this.actor.items.filter((item) => item.flags["items-with-spells-5e"]?.["item-spells"]?.length);
-                        for (const item of spellItems) {
-                            const spellData = item.flags["items-with-spells-5e"]["item-spells"];
-                            const itemsInSpell = spellData.map((spell) => this.actor.items.get(spell.id)).filter((item) => item && item.system.activation?.type === actionType);
-                            if(!itemsInSpell.length) continue;
-                            itemsToIgnore.push(...itemsInSpell);
+                        console.log("items-with-powers-5e");
+                        const powerItems = this.actor.items.filter((item) => item.flags["items-with-powers-5e"]?.["item-powers"]?.length);
+                        for (const item of powerItems) {
+                            const powerData = item.flags["items-with-powers-5e"]["item-powers"];
+                            const itemsInPower = powerData.map((power) => this.actor.items.get(power.id)).filter((item) => item && item.system.activation?.type === actionType);
+                            if(!itemsInPower.length) continue;
+                            itemsToIgnore.push(...itemsInPower);
                             if(item.system.attunement === 1) continue;
-                            itemsWithSpells.push({
+                            itemsWithPowers.push({
                                 label: item.name,
-                                buttons: itemsInSpell.map((item) => new DND5eItemButton({ item })),
+                                buttons: itemsInPower.map((item) => new SW5eItemButton({ item })),
                                 uses: () => {return { max: item.system.uses?.max, value: item.system.uses?.value }},
                             });
                         }
@@ -818,46 +818,46 @@ export function initConfig() {
                         });
                     }
 
-                    const spells = [
-                        ...itemsWithSpells,
+                    const powers = [
+                        ...itemsWithPowers,
                         {
-                            label: "DND5E.SpellPrepAtWill",
-                            buttons: this.items.filter((item) => item.system.preparation.mode === "atwill").map((item) => new DND5eItemButton({ item })),
+                            label: "SW5E.PowerPrepAtWill",
+                            buttons: this.items.filter((item) => item.system.preparation.mode === "atwill").map((item) => new SW5eItemButton({ item })),
                             uses: { max: Infinity, value: Infinity },
                         },
                         {
-                            label: "DND5E.SpellPrepInnate",
-                            buttons: this.items.filter((item) => item.system.preparation.mode === "innate").map((item) => new DND5eItemButton({ item })),
+                            label: "SW5E.PowerPrepInnate",
+                            buttons: this.items.filter((item) => item.system.preparation.mode === "innate").map((item) => new SW5eItemButton({ item })),
                             uses: { max: Infinity, value: Infinity },
                         },
                         {
-                            label: Object.values(spellLevels)[0],
-                            buttons: this.items.filter((item) => item.system.level == 0).map((item) => new DND5eItemButton({ item })),
+                            label: Object.values(powerLevels)[0],
+                            buttons: this.items.filter((item) => item.system.level == 0).map((item) => new SW5eItemButton({ item })),
                             uses: { max: Infinity, value: Infinity },
                         },
                         {
-                            label: "DND5E.PactMagic",
-                            buttons: this.items.filter((item) => item.system.preparation.mode === "pact").map((item) => new DND5eItemButton({ item })),
-                            uses: () => { return this.actor.system.spells.pact }
+                            label: "SW5E.PactMagic",
+                            buttons: this.items.filter((item) => item.system.preparation.mode === "pact").map((item) => new SW5eItemButton({ item })),
+                            uses: () => { return this.actor.system.powers.pact }
                         },
                     ];
-                    for (const [level, label] of Object.entries(spellLevels)) {
-                        const levelSpells = this.items.filter((item) => item.system.level == level && (item.system.preparation.mode === "prepared" || item.system.preparation.mode === "always"));
-                        if (!levelSpells.length || level == 0) continue;
-                        spells.push({
+                    for (const [level, label] of Object.entries(powerLevels)) {
+                        const levelPowers = this.items.filter((item) => item.system.level == level && (item.system.preparation.mode === "prepared" || item.system.preparation.mode === "always"));
+                        if (!levelPowers.length || level == 0) continue;
+                        powers.push({
                             label,
-                            buttons: levelSpells.map((item) => new DND5eItemButton({ item })),
-                            uses: () => { return this.actor.system.spells[`spell${level}`] },
+                            buttons: levelPowers.map((item) => new SW5eItemButton({ item })),
+                            uses: () => { return this.actor.system.powers[`power${level}`] },
                         });
                     }
-                    return new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanel({ id: this.id, accordionPanelCategories: spells.filter((spell) => spell.buttons.length).map(({ label, buttons, uses }) => new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanelCategory({ label, buttons, uses })) });
+                    return new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanel({ id: this.id, accordionPanelCategories: powers.filter((power) => power.buttons.length).map(({ label, buttons, uses }) => new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanelCategory({ label, buttons, uses })) });
                 } else {
-                    return new ARGON.MAIN.BUTTON_PANELS.ButtonPanel({ id: this.id, buttons: this.items.map((item) => new DND5eItemButton({ item })) });
+                    return new ARGON.MAIN.BUTTON_PANELS.ButtonPanel({ id: this.id, buttons: this.items.map((item) => new SW5eItemButton({ item })) });
                 }
             }
         }
 
-        class DND5eSpecialActionButton extends ARGON.MAIN.BUTTONS.ActionButton {
+        class SW5eSpecialActionButton extends ARGON.MAIN.BUTTONS.ActionButton {
             constructor(specialItem) {
                 super();
                 const actorItem = this.actor.items.getName(specialItem.name);
@@ -882,7 +882,7 @@ export function initConfig() {
 
             async getTooltipData() {
                 const tooltipData = await getTooltipDetails(this.item);
-                tooltipData.propertiesLabel = "enhancedcombathud-dnd5e.tooltip.properties.name";
+                tooltipData.propertiesLabel = "enhancedcombathud-sw5e.tooltip.properties.name";
                 return tooltipData;
             }
 
@@ -896,12 +896,12 @@ export function initConfig() {
                     success = await this.item.use({ event }, { event });
                 }
                 if (success) {
-                    DND5eItemButton.consumeActionEconomy(this.item);
+                    SW5eItemButton.consumeActionEconomy(this.item);
                 }
             }
         }
 
-        class DND5eMovementHud extends ARGON.MovementHud {
+        class SW5eMovementHud extends ARGON.MovementHud {
 
             constructor (...args) {
                 super(...args);
@@ -917,7 +917,7 @@ export function initConfig() {
             }
         }
 
-        class DND5eWeaponSets extends ARGON.WeaponSets {
+        class SW5eWeaponSets extends ARGON.WeaponSets {
             async getDefaultSets() {
                 const sets = await super.getDefaultSets();
                 if (this.actor.type !== "npc") return sets;
@@ -940,7 +940,7 @@ export function initConfig() {
             }
 
             async _onSetChange({ sets, active }) {
-                const switchEquip = game.settings.get("enhancedcombathud-dnd5e", "switchEquip");
+                const switchEquip = game.settings.get("enhancedcombathud-sw5e", "switchEquip");
                 if (!switchEquip) return;
                 const updates = [];
                 const activeSet = sets[active];
@@ -957,23 +957,23 @@ export function initConfig() {
             }
         }
 
-        CoreHUD.definePortraitPanel(DND5ePortraitPanel);
-        CoreHUD.defineDrawerPanel(DND5eDrawerPanel);
-        CoreHUD.defineMainPanels([DND5eActionActionPanel, DND5eBonusActionPanel, DND5eReactionActionPanel, DND5eFreeActionPanel, DND5eLegActionPanel, DND5eLairActionPanel, ARGON.PREFAB.PassTurnPanel]);
-        CoreHUD.defineMovementHud(DND5eMovementHud);
-        CoreHUD.defineWeaponSets(DND5eWeaponSets);
+        CoreHUD.definePortraitPanel(SW5ePortraitPanel);
+        CoreHUD.defineDrawerPanel(SW5eDrawerPanel);
+        CoreHUD.defineMainPanels([SW5eActionActionPanel, SW5eBonusActionPanel, SW5eReactionActionPanel, SW5eFreeActionPanel, SW5eLegActionPanel, SW5eLairActionPanel, ARGON.PREFAB.PassTurnPanel]);
+        CoreHUD.defineMovementHud(SW5eMovementHud);
+        CoreHUD.defineWeaponSets(SW5eWeaponSets);
         CoreHUD.defineSupportedActorTypes(["character", "npc"]);
     });
 }
 
 function registerItems() {
-    ECHItems[game.i18n.localize("enhancedcombathud-dnd5e.items.disengage.name")] = {
-        name: game.i18n.localize("enhancedcombathud-dnd5e.items.disengage.name"),
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.disengage.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.disengage.name"),
         type: "feat",
         img: "modules/enhancedcombathud/icons/journey.webp",
         system: {
             description: {
-                value: game.i18n.localize("enhancedcombathud-dnd5e.items.disengage.desc"),
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.disengage.desc"),
                 chat: "",
                 unidentified: "",
             },
@@ -1024,7 +1024,7 @@ function registerItems() {
             save: {
                 ability: "",
                 dc: null,
-                scaling: "spell",
+                scaling: "power",
             },
         },
         effects: [
@@ -1062,13 +1062,13 @@ function registerItems() {
             },
         },
     };
-    ECHItems[game.i18n.localize("enhancedcombathud-dnd5e.items.dodge.name")] = {
-        name: game.i18n.localize("enhancedcombathud-dnd5e.items.dodge.name"),
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.dodge.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.dodge.name"),
         type: "feat",
         img: "modules/enhancedcombathud/icons/armor-upgrade.webp",
         system: {
             description: {
-                value: game.i18n.localize("enhancedcombathud-dnd5e.items.dodge.desc"),
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.dodge.desc"),
                 chat: "",
                 unidentified: "",
             },
@@ -1120,7 +1120,7 @@ function registerItems() {
             save: {
                 ability: "",
                 dc: null,
-                scaling: "spell",
+                scaling: "power",
             },
             consumableType: "trinket",
         },
@@ -1155,13 +1155,13 @@ function registerItems() {
             },
         },
     };
-    ECHItems[game.i18n.localize("enhancedcombathud-dnd5e.items.ready.name")] = {
-        name: game.i18n.localize("enhancedcombathud-dnd5e.items.ready.name"),
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.ready.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.ready.name"),
         type: "feat",
         img: "modules/enhancedcombathud/icons/clockwork.webp",
         system: {
             description: {
-                value: game.i18n.localize("enhancedcombathud-dnd5e.items.ready.desc"),
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.ready.desc"),
                 chat: "",
                 unidentified: "",
             },
@@ -1213,7 +1213,7 @@ function registerItems() {
             save: {
                 ability: "",
                 dc: null,
-                scaling: "spell",
+                scaling: "power",
             },
             consumableType: "trinket",
         },
@@ -1247,13 +1247,13 @@ function registerItems() {
             },
         },
     };
-    ECHItems[game.i18n.localize("enhancedcombathud-dnd5e.items.hide.name")] = {
-        name: game.i18n.localize("enhancedcombathud-dnd5e.items.hide.name"),
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.hide.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.hide.name"),
         type: "feat",
         img: "modules/enhancedcombathud/icons/cloak-dagger.webp",
         system: {
             description: {
-                value: game.i18n.localize("enhancedcombathud-dnd5e.items.hide.desc"),
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.hide.desc"),
                 chat: "",
                 unidentified: "",
             },
@@ -1309,7 +1309,7 @@ function registerItems() {
             save: {
                 ability: "",
                 dc: null,
-                scaling: "spell",
+                scaling: "power",
             },
             consumableType: "trinket",
         },
@@ -1343,13 +1343,13 @@ function registerItems() {
             },
         },
     };
-    ECHItems[game.i18n.localize("enhancedcombathud-dnd5e.items.dash.name")] = {
-        name: game.i18n.localize("enhancedcombathud-dnd5e.items.dash.name"),
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.dash.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.dash.name"),
         type: "feat",
         img: "modules/enhancedcombathud/icons/walking-boot.webp",
         system: {
             description: {
-                value: game.i18n.localize("enhancedcombathud-dnd5e.items.dash.desc"),
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.dash.desc"),
                 chat: "",
                 unidentified: "",
             },
@@ -1401,7 +1401,7 @@ function registerItems() {
             save: {
                 ability: "",
                 dc: null,
-                scaling: "spell",
+                scaling: "power",
             },
             consumableType: "trinket",
         },
@@ -1435,13 +1435,13 @@ function registerItems() {
             },
         },
     };
-    ECHItems[game.i18n.localize("enhancedcombathud-dnd5e.items.shove.name")] = {
-        name: game.i18n.localize("enhancedcombathud-dnd5e.items.shove.name"),
+    ECHItems[game.i18n.localize("enhancedcombathud-sw5e.items.shove.name")] = {
+        name: game.i18n.localize("enhancedcombathud-sw5e.items.shove.name"),
         type: "feat",
         img: "modules/enhancedcombathud/icons/shield-bash.webp",
         system: {
             description: {
-                value: game.i18n.localize("enhancedcombathud-dnd5e.items.shove.desc"),
+                value: game.i18n.localize("enhancedcombathud-sw5e.items.shove.desc"),
                 chat: "",
                 unidentified: "",
             },
@@ -1493,7 +1493,7 @@ function registerItems() {
             save: {
                 ability: "",
                 dc: null,
-                scaling: "spell",
+                scaling: "power",
             },
             consumableType: "trinket",
         },
@@ -1506,7 +1506,7 @@ function registerItems() {
         },
     };
 
-    if (game.settings.get("enhancedcombathud-dnd5e", "noAA")) {
+    if (game.settings.get("enhancedcombathud-sw5e", "noAA")) {
         for (let key of Object.keys(ECHItems)) {
             delete ECHItems[key].effects;
         }
