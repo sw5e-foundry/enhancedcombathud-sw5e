@@ -468,19 +468,19 @@ export function initConfig() {
 
                 const showSpecialActions = game.settings.get(MODULE_ID, "showSpecialActions");
                 const makeSpecialActionButton = (idx => new SW5eSpecialActionButton(specialActions[idx]));
-                const makeSpecialActionButtons = (indexes => new ARGON.MAIN.BUTTONS.SplitButton(indexes.map(makeSpecialActionButton)));
+                const makeSpecialActionButtons = (idxs => new ARGON.MAIN.BUTTONS.SplitButton(...idxs.map(makeSpecialActionButton)));
                 const buttons = [];
 
                 buttons.push(new SW5eItemButton({ item: null, isWeaponSet: true, isPrimary: true }));
-                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([0, 1]));
+                if (showSpecialActions) buttons.push(makeSpecialActionButtons([0, 1]));
                 buttons.push(...powerButton);
-                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([2, 3]));
+                if (showSpecialActions) buttons.push(makeSpecialActionButtons([2, 3]));
                 buttons.push(new SW5eButtonPanelButton({ type: "maneuver", items: maneuverItems, color: 0 }));
-                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([4, 5]));
-                buttons.push(new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 });
-                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([6, 7]));
+                if (showSpecialActions) buttons.push(makeSpecialActionButtons([4, 5]));
+                buttons.push(new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 }));
+                if (showSpecialActions) buttons.push(makeSpecialActionButtons([6, 7]));
                 buttons.push(new SW5eButtonPanelButton({ type: "consumable", items: consumableItems, color: 0 }));
-                if (showSpecialActions) buttons.push(...makeSpecialActionButtons([8, 9]));
+                if (showSpecialActions) buttons.push(makeSpecialActionButtons([8, 9]));
 
                 const barItems = this.actor.items.filter((item) => CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.action.includes(item.system.activation?.type));
                 buttons.push(...condenseItemButtons(barItems));
@@ -662,6 +662,7 @@ export function initConfig() {
         class SW5eItemButton extends ARGON.MAIN.BUTTONS.ItemButton {
             constructor(...args) {
                 super(...args);
+                Hooks.on("updateItem", this._onUpdateItem.bind(this));
             }
 
             get hasTooltip() {
@@ -701,6 +702,11 @@ export function initConfig() {
                 return tooltipData;
             }
 
+            async _onMouseUp(event) {
+                super._onMouseUp(event);
+                if (event.button === 1) this._onMiddleClick(event);
+            }
+
             async _onLeftClick(event) {
                 ui.ARGON.interceptNextDialog(event.currentTarget);
                 const used = await this.item.use({ event }, { event });
@@ -710,8 +716,17 @@ export function initConfig() {
                 }
             }
 
+            async _onMiddleClick(event) {
+                this.item.reloadWeapon();
+            }
+
             async _onRightClick(event) {
                 this.item?.sheet?.render(true);
+            }
+
+            _onUpdateItem(item) {
+                if (item !== this._item) return;
+                this.render();
             }
 
             static consumeActionEconomy(item) {
@@ -751,10 +766,10 @@ export function initConfig() {
                 if (!this.item?.system) return null;
                 const showQuantityItemTypes = ["consumable"];
                 const consumeType = this.item.system.consume?.type;
-                if (consumeType === "ammo") {
-                    const ammoItem = this.actor.items.get(this.item.system.consume.target);
-                    if (!ammoItem) return null;
-                    return Math.floor((ammoItem.system.quantity ?? 0) / this.item.system.consume.amount);
+                if (this.item.hasAmmo) {
+                    const ammo = this.item.getAmmo;
+                    if (!ammo.item) return null;
+                    return Math.floor(ammo.quantity / ammo.consumeAmount);
                 } else if (consumeType === "attribute") {
                     return Math.floor(getProperty(this.actor.system, this.item.system.consume.target) / this.item.system.consume.amount);
                 } else if (consumeType === "charges") {
@@ -765,6 +780,14 @@ export function initConfig() {
                     return this.item.system.uses?.value ?? this.item.system.quantity;
                 } else if (this.item.system.uses.value !== null && this.item.system.uses.per !== null) {
                     return this.item.system.uses.value;
+                }
+                return null;
+            }
+
+            get quantitySecondary() {
+                if (this.item.system.hasReload) {
+                    const reloadItem = this.item.getAmmo.item;
+                    if (reloadItem) return reloadItem?.system?.quantity;
                 }
                 return null;
             }
@@ -856,7 +879,7 @@ export function initConfig() {
                         if (allowIfNotPrepared.includes(item.system.preparation.mode)) return true;
                         if (item.system.level == 0) return true;
                         return item.system.preparation.prepared;
-                    }
+                    });
                     this.items = this.items.filter((item) => !itemsToIgnore.includes(item));
                 }
                 if (this.showPreparedOnly) {
@@ -961,7 +984,7 @@ export function initConfig() {
         class SW5eAccordionPanelCategory extends ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanelCategory {
           _setUses() {
             if (this.uses.max === undefined) {
-                this.buttonContainer.querySelector(".feature-spell-slots").remove();
+                this.buttonContainer.querySelector(".feature-spell-slots")?.remove();
                 this.buttonContainer.style["margin-bottom"] = "0px";
             }
 
