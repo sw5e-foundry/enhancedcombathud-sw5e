@@ -131,33 +131,32 @@ export function initConfig() {
 
         function getDamageTypeIcon(damageType) {
             switch (damageType.toLowerCase()) {
+                case "kinetic":
+                    return '<i class="fas fa-sword"></i>';
                 case "acid":
                     return '<i class="fas fa-flask"></i>';
-                case "bludgeoning":
-                    return '<i class="fas fa-hammer"></i>';
                 case "cold":
                     return '<i class="fas fa-snowflake"></i>';
+                case "energy":
+                    return '<i class="fas fa-sword-laser"></i>';
                 case "fire":
                     return '<i class="fas fa-fire"></i>';
                 case "force":
                     return '<i class="fas fa-hand-sparkles"></i>';
+                case "ion":
+                    return '<i class="fas fa-user-robot-xmarks"></i>';
                 case "lightning":
                     return '<i class="fas fa-bolt"></i>';
                 case "necrotic":
                     return '<i class="fas fa-skull"></i>';
-                case "piercing":
-                    return '<i class="fas fa-crosshairs"></i>';
                 case "poison":
                     return '<i class="fas fa-skull-crossbones"></i>';
                 case "psychic":
                     return '<i class="fas fa-brain"></i>';
-                case "radiant":
-                    return '<i class="fas fa-sun"></i>';
-                case "slashing":
-                    return '<i class="fas fa-cut"></i>';
-                case "thunder":
+                case "sonic":
                     return '<i class="fas fa-bell"></i>';
                 case "healing":
+                case "temphp":
                     return '<i class="fas fa-heart"></i>';
                 default:
                     return "";
@@ -428,10 +427,10 @@ export function initConfig() {
             }
 
             async _getButtons() {
-                const powerItems = this.actor.items.filter((item) => itemTypes.power.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5e.mainBarFeatures.includes(item.system.type?.value));
+                const powerItems = this.actor.items.filter((item) => itemTypes.power.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
                 const maneuverItems = this.actor.items.filter((item) => itemTypes.maneuver.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
-                const featItems = this.actor.items.filter((item) => itemTypes.feat.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5e.mainBarFeatures.includes(item.system.type?.value));
-                const consumableItems = this.actor.items.filter((item) => itemTypes.consumable.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5e.mainBarFeatures.includes(item.system.type?.value));
+                const featItems = this.actor.items.filter((item) => itemTypes.feat.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
+                const consumableItems = this.actor.items.filter((item) => itemTypes.consumable.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
                 console.log("powerItems", powerItems);
                 const powerButton = !powerItems.length ? [] : [new SW5eButtonPanelButton({ type: "power", items: powerItems, color: 0 })].filter((button) => button.hasContents);
 
@@ -822,7 +821,7 @@ export function initConfig() {
             prePreparePowers() {
                 if (this.type !== "power") return;
                 
-                const powerLevels = CONFIG.SW5e.powerLevels;
+                const powerLevels = CONFIG.SW5E.powerLevels;
                 const itemsToIgnore = [];
                 if (game.modules.get("items-with-powers-5e")?.active) {
                     const actionType = this.items[0].system.activation?.type;
