@@ -863,22 +863,22 @@ export function initConfig() {
                     {
                         label: "SW5E.PowerPrepAtWill",
                         buttons: this.items.filter((item) => item.system.preparation.mode === "atwill").map((item) => new SW5eItemButton({ item })),
-                        uses: { max: Infinity, value: Infinity },
+                        // uses: { max: Infinity, value: Infinity },
                     },
                     {
                         label: "SW5E.PowerPrepInnate",
                         buttons: this.items.filter((item) => item.system.preparation.mode === "innate").map((item) => new SW5eItemButton({ item })),
-                        uses: { max: Infinity, value: Infinity },
+                        // uses: { max: Infinity, value: Infinity },
                     },
                     {
                         label: Object.values(powerLevels)[0],
                         buttons: this.items.filter((item) => item.system.level == 0).map((item) => new SW5eItemButton({ item })),
-                        uses: { max: Infinity, value: Infinity },
+                        // uses: { max: Infinity, value: Infinity },
                     },
                     {
                         label: "SW5E.PactMagic",
                         buttons: this.items.filter((item) => item.system.preparation.mode === "pact").map((item) => new SW5eItemButton({ item })),
-                        uses: () => { return this.actor.system.powers.pact }
+                        // uses: () => { return this.actor.system.powers.pact }
                     },
                 ];
                 for (const [level, label] of Object.entries(powerLevels)) {
@@ -887,7 +887,7 @@ export function initConfig() {
                     powers.push({
                         label,
                         buttons: levelPowers.map((item) => new SW5eItemButton({ item })),
-                        uses: () => { return this.actor.system.powers[`power${level}`] },
+                        // uses: () => { return this.actor.system.powers[`power${level}`] },
                     });
                 }
                 return powers.filter((power) => power.buttons.length);
@@ -895,7 +895,7 @@ export function initConfig() {
 
             async _getPanel() {
                 if (this.type === "power") {
-                    return new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanel({ id: this.id, accordionPanelCategories: this._powers.map(({ label, buttons, uses }) => new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanelCategory({ label, buttons, uses })) });
+                    return new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanel({ id: this.id, accordionPanelCategories: this._powers.map(({ label, buttons, uses }) => new SW5eAccordionPanelCategory({ label, buttons, uses })) });
                 } else {
                     return new ARGON.MAIN.BUTTON_PANELS.ButtonPanel({ id: this.id, buttons: this.items.map((item) => new SW5eItemButton({ item })) });
                 }
@@ -903,9 +903,20 @@ export function initConfig() {
 
             async _renderInner() {
                 await super._renderInner();
-                if(Number.isNumeric(this.quantity)) {
-                    this.element.classList.add("has-count");
-                    this.element.dataset.itemCount = this.quantity;
+                const quantity = this.quantity;
+                const quantitySecondary = this.quantitySecondary;
+                const html = [quantity, quantitySecondary].reduce((html, val, index) => {
+                    if (val !== null) html += `
+                        <div class="quantity-${index+1} multiline">
+                            <div class="border-triangle"></div>
+                            <span>${val}</span>
+                        </div>`;
+                    return html;
+                }, '');
+                this.element.insertAdjacentHTML("afterbegin", html);
+                if (quantity !== null || quantitySecondary !== null) {
+                    const isBothZero = (( quantity ?? 0) + (quantitySecondary ?? 0)) === 0;
+                    this.element.style.filter = isBothZero ? "grayscale(1)" : null;
                 }
             }
 
@@ -913,9 +924,31 @@ export function initConfig() {
                 if (this.type === "maneuver") {
                     const superiorityDice = this?.actor?.system?.scale?.superiority?.dice;
                     return superiorityDice.value;
+                } else if (this.type === "power") {
+                    const points = this?.actor?.system?.attributes?.force?.points;
+                    if (points?.max) return `${points.value} FP`;
                 }
                 return null;
             }
+
+            get quantitySecondary() {
+                if (this.type === "power") {
+                    const points = this?.actor?.system?.attributes?.tech?.points;
+                    if (points?.max) return `${points.value} TP`;
+                }
+                return null;
+            }
+        }
+
+        class SW5eAccordionPanelCategory extends ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanelCategory {
+          _setUses() {
+            if (this.uses.max === undefined) {
+                this.buttonContainer.querySelector(".feature-spell-slots").remove();
+                this.buttonContainer.style["margin-bottom"] = "0px";
+            }
+
+            return super._setUses();
+          }
         }
 
         class SW5eSpecialActionButton extends ARGON.MAIN.BUTTONS.ActionButton {

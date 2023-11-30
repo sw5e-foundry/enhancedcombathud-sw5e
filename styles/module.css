@@ -1,0 +1,8 @@
+.action-hud .quantity-1.multiline span {
+    font-size: 18px;
+    text-align: left;
+}
+.action-hud .quantity-2.multiline span {
+    font-size: 18px;
+    text-align: right;
+}
