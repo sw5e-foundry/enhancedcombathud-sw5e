@@ -131,33 +131,32 @@ export function initConfig() {
 
         function getDamageTypeIcon(damageType) {
             switch (damageType.toLowerCase()) {
+                case "kinetic":
+                    return '<i class="fas fa-sword"></i>';
                 case "acid":
                     return '<i class="fas fa-flask"></i>';
-                case "bludgeoning":
-                    return '<i class="fas fa-hammer"></i>';
                 case "cold":
                     return '<i class="fas fa-snowflake"></i>';
+                case "energy":
+                    return '<i class="fas fa-sword-laser"></i>';
                 case "fire":
                     return '<i class="fas fa-fire"></i>';
                 case "force":
                     return '<i class="fas fa-hand-sparkles"></i>';
+                case "ion":
+                    return '<i class="fas fa-user-robot-xmarks"></i>';
                 case "lightning":
                     return '<i class="fas fa-bolt"></i>';
                 case "necrotic":
                     return '<i class="fas fa-skull"></i>';
-                case "piercing":
-                    return '<i class="fas fa-crosshairs"></i>';
                 case "poison":
                     return '<i class="fas fa-skull-crossbones"></i>';
                 case "psychic":
                     return '<i class="fas fa-brain"></i>';
-                case "radiant":
-                    return '<i class="fas fa-sun"></i>';
-                case "slashing":
-                    return '<i class="fas fa-cut"></i>';
-                case "thunder":
+                case "sonic":
                     return '<i class="fas fa-bell"></i>';
                 case "healing":
+                case "temphp":
                     return '<i class="fas fa-heart"></i>';
                 default:
                     return "";
