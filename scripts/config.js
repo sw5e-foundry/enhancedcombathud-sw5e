@@ -653,6 +653,7 @@ export function initConfig() {
         class SW5eItemButton extends ARGON.MAIN.BUTTONS.ItemButton {
             constructor(...args) {
                 super(...args);
+                Hooks.on("updateItem", this._onUpdateItem.bind(this));
             }
 
             get hasTooltip() {
@@ -694,6 +695,11 @@ export function initConfig() {
                 return tooltipData;
             }
 
+            async _onMouseUp(event) {
+                super._onMouseUp(event);
+                if (event.button === 1) this._onMiddleClick(event);
+            }
+
             async _onLeftClick(event) {
                 ui.ARGON.interceptNextDialog(event.currentTarget);
                 const used = await this.item.use({ event }, { event });
@@ -703,8 +709,17 @@ export function initConfig() {
                 }
             }
 
+            async _onMiddleClick(event) {
+                this.item.reloadWeapon();
+            }
+
             async _onRightClick(event) {
                 this.item?.sheet?.render(true);
+            }
+
+            _onUpdateItem(item) {
+                if (item !== this._item) return;
+                this.render();
             }
 
             static consumeActionEconomy(item) {
@@ -744,10 +759,10 @@ export function initConfig() {
                 if (!this.item?.system) return null;
                 const showQuantityItemTypes = ["consumable"];
                 const consumeType = this.item.system.consume?.type;
-                if (consumeType === "ammo") {
-                    const ammoItem = this.actor.items.get(this.item.system.consume.target);
-                    if (!ammoItem) return null;
-                    return Math.floor((ammoItem.system.quantity ?? 0) / this.item.system.consume.amount);
+                if (this.item.hasAmmo) {
+                    const ammo = this.item.getAmmo;
+                    if (!ammo.item) return null;
+                    return Math.floor(ammo.quantity / ammo.consumeAmount);
                 } else if (consumeType === "attribute") {
                     return Math.floor(getProperty(this.actor.system, this.item.system.consume.target) / this.item.system.consume.amount);
                 } else if (consumeType === "charges") {
@@ -758,6 +773,14 @@ export function initConfig() {
                     return this.item.system.uses?.value ?? this.item.system.quantity;
                 } else if (this.item.system.uses.value !== null && this.item.system.uses.per !== null) {
                     return this.item.system.uses.value;
+                }
+                return null;
+            }
+
+            get quantitySecondary() {
+                if (this.item.system.hasReload) {
+                    const reloadItem = this.item.getAmmo.item;
+                    if (reloadItem) return reloadItem?.system?.quantity;
                 }
                 return null;
             }
@@ -942,7 +965,7 @@ export function initConfig() {
         class SW5eAccordionPanelCategory extends ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanelCategory {
           _setUses() {
             if (this.uses.max === undefined) {
-                this.buttonContainer.querySelector(".feature-spell-slots").remove();
+                this.buttonContainer.querySelector(".feature-spell-slots")?.remove();
                 this.buttonContainer.style["margin-bottom"] = "0px";
             }
 
