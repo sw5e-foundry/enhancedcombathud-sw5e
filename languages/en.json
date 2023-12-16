@@ -50,6 +50,12 @@
       "useitem": {
         "name": "Use Item"
       },
+      "crew-action": {
+        "name": "Crew Action"
+      },
+      "pilot-action": {
+        "name": "Pilot Action"
+      },
       "bonusaction": {
         "name": "Bonus"
       },
@@ -183,6 +189,48 @@
       },
       "tec": {
         "tooltip": "Your Intelligence (Technology) checks measure your ability to recall information about droids, vehicles, spaceships, aircraft, and computers, as well as your ability to interface with them. Technology can also be used to stabilize a droid or construct."
+      },
+      "ast": {
+        "tooltip": "<p>Make an Astrogation check to calculate hyperspace jumps. For more details on making Astrogation checks, see the \"Travel in Hyperspace\" section of Chapter 8.</p>\n<p>When you would make an Intelligence (Astrogation) check, you may instead make an Intelligence (Technology) check at disadvantage using your own Intelligence modifier.</p>"
+      },
+      "bst": {
+        "tooltip": "<p>Use the Boost skill when you attempt to push your ship to or beyond its limits. A successful Boost check can break ties in straight-line speed contests or to determine how fast your ship can accelerate to top speed. You also make boost checks in response to taking the boost engines, boost shields, and boost weapons actions.</p>"
+      },
+      "dat": {
+        "tooltip": "<p>Use the Data skill when you want to access your ship’s data banks to learn information about appropriate information. Ships often have standard information about hyperlanes, systems, planets, and other astronomical information. Ships can also be upgraded to include more detailed information or information on other subjects. The more obscure the information or the more off-topic, the higher the DC should be.</p>"
+      },
+      "hid": {
+        "tooltip": "<p>The Hide skill allows the ship to remain undetected by sensors from other ships and stations. Use the Hide skill when you want to approach a ship or station along a known blind spot, or slink through a debris field, or hide amongst asteroids.</p>\n<p>The Hide skill is generally contested by a passive Wisdom (Scan) score if the ship’s presence is unknown, a Wisdom (Scan) check if the presence is suspected or known but the general location is unknown, and an Intelligence (Probe) check if the approximate location of a ship is known or suspected.</p>"
+      },
+      "imp": {
+        "tooltip": "<p>The Impress skill is a general measurement of your ship’s beauty and soundness. Whether or not your ship is impressively outfitted and well maintained, does it look impressively outfitted and well maintained? Does your on-board cantina look opulent?</p>\n<p>When you would make a Charisma (Impress) check, you may instead choose to make a Charisma (Persuasion) check at disadvantage using your own Charisma modifier.</p>"
+      },
+      "inf": {
+        "tooltip": "<p>When you attempt to interfere with another ship or creature you use the Interfere skill. When you would make a Charisma (Interfere) check, you may instead choose to make an Intelligence (Slicer’s Kit) check at disadvantage using your own Intelligence modifier.</p>"
+      },
+      "man": {
+        "tooltip": "<p>Use the Maneuvering skill to perform tricky maneuvers in combat, to deftly fly through an asteroid field, and to impress others with flying skills.</p>\n<p>When you would make a Dexterity (Maneuvering) check, you may instead make an Intelligence (Piloting) check at disadvantage.</p>\n<p>Your ship is considered proficiently equipped in this skill if the crewmember at the helm is proficient in Piloting.</p>\n<p>Your ship is considered expertly equipped in this skill if the crewmember at the helm has expertise in Piloting.</p>"
+      },
+      "men": {
+        "tooltip": "<p>When you attempt to influence someone through the threat of your ship’s abilities, whether speed, firepower, or toughness, the GM might ask you to make a Charisma (Menace) check. Alternatively, you may make a Charisma (Intimidate) check at disadvantage using your own Charisma modifier.</p>"
+      },
+      "pat": {
+        "tooltip": "<p>You can attempt to have the ship patch up damage it has taken, using one of its Hull Dice. When you take the Patch action, you make a Constitution (Patch) check (DC = 10 or half the ship’s missing hull points, whichever number is higher). On a failure, you have disadvantage on the Hull Dice roll. On a success you roll the Hull Die normally.</p>\n<p>When you would make a Constitution (Patch) check, you may instead make an Intelligence (Mechanic’s Kit) check at disadvantage using your own Intelligence modifier.</p>"
+      },
+      "prb": {
+        "tooltip": "<p>When you focus your ship’s sensor suite on an area or ship and investigate in detail, you make an Intelligence (Probe) check. A successful check may reveal the location of a hidden ship, may indicate the presence of physical damage in a construct or of minerals in an asteroid, or may provide technical details about a ship you have probed or the presence of lifeforms on board.</p>\n<p>When you would make an Intelligence (Probe) check, you may instead make an Intelligence (Investigation) check at disadvantage using your own Intelligence modifier.</p>"
+      },
+      "ram": {
+        "tooltip": "<p>Use the Ram skill when you want to slam into another object to deal damage.</p>"
+      },
+      "reg": {
+        "tooltip": "<p>Your GM may require a Regulation check when your ship is pushed beyond its natural limits. Situations which might call for a Regulation check include:</p>\n<p>- Trying to reach safety on low fuel</p>\n<p>- In response to a mechanic straining the reactor</p>\n<p>- Attempting to run at top speed for long periods of time</p>\n<p>- Keeping life support running when out of fuel.</p>\n<p>- When you would make a Constitution (Regulation) check, you may instead make an Intelligence (Mechanic’s Kit) check at disadvantage using your own Intelligence modifier.</p>"
+      },
+      "scn": {
+        "tooltip": "<p>Your Wisdom (Scan) check lets you notice and locate the presence of something near your ship. It measures your general awareness of the ship’s surroundings and the keenness of your ship’s detection algorithms.</p>\n<p>When you would make a Wisdom (Scan) check, you may instead make a Wisdom (Perception) check at disadvantage using your own Wisdom modifier.</p>"
+      },
+      "swn": {
+        "tooltip": "<p>Use the Swindle skill when you want to pass your ship off as something it’s not. Examples of using the Swindle skill include:</p>\n<p>- passing off a heavily armed ship as a simple freighter</p>\n<p>- concealing the presence of lifeforms on your ship</p>\n<p>- concealing the presence of hidden cargo.</p>\n<p>When you would make a Charisma (Swindle) check, you may instead choose to make a Charisma (Deception) check at disadvantage using your own Charisma modifier.</p>"
       }
     },
     "abilities": {

@@ -44,7 +44,7 @@ export function initConfig() {
             let materialComponents = "";
 
             if (type == "skill") {
-                title = CONFIG.SW5E.skills[item].label;
+                title = CONFIG.SW5E.allSkills[item].label;
                 description = game.i18n.localize(`enhancedcombathud-sw5e.skills.${item}.tooltip`);
             } else if (type == "save") {
                 title = CONFIG.SW5E.abilities[item].label;
@@ -207,6 +207,7 @@ export function initConfig() {
                 const actor = this.actor;
                 const isNPC = type === "npc";
                 const isPC = type === "character";
+                const isStarship = type === "starship";
                 if (isNPC) {
                     const creatureType = game.i18n.localize(CONFIG.SW5E.creatureTypes[actor.system.details.type.value] ?? actor.system.details.type.custom);
                     const cr = system.details.cr >= 1 || system.details.cr <= 0 ? system.details.cr : `1/${1 / system.details.cr}`;
@@ -216,6 +217,11 @@ export function initConfig() {
                         .map((c) => c.name)
                         .join(" / ");
                     return `Level ${system.details.level} ${classes} (${system.details.species})`;
+                } else if (isStarship) {
+                    const size = Object.values(actor.starships)
+                        .map((ss) => ss.name)
+                        .join(" / ");
+                    return `Tier ${system.details.tier} ${size}`;
                 } else {
                     return "";
                 }
@@ -246,8 +252,9 @@ export function initConfig() {
             }
 
             async getStatBlocks() {
+                const isStarship = this.actor.type === "starship";
                 const HPText = game.i18n
-                    .localize("SW5E.HitPoints")
+                    .localize(isStarship ? "SW5E.HullPoints" : "SW5E.HitPoints")
                     .split(" ")
                     .map((word) => word.charAt(0).toUpperCase())
                     .join("");
@@ -257,37 +264,105 @@ export function initConfig() {
                     .map((word) => word.charAt(0).toUpperCase())
                     .join("");
 
-                const hpColor = this.actor.system.attributes.hp.temp ? "#6698f3" : "rgb(0 255 170)";
-                const tempMax = this.actor.system.attributes.hp.tempmax;
-                const hpMaxColor = tempMax ? (tempMax > 0 ? "rgb(222 91 255)" : "#ffb000") : "rgb(255 255 255)";
-
-                return [
-                    [
-                        {
-                            text: `${this.actor.system.attributes.hp.value + (this.actor.system.attributes.hp.temp ?? 0)}`,
-                            color: hpColor,
-                        },
-                        {
-                            text: `/`,
-                        },
-                        {
-                            text: `${this.actor.system.attributes.hp.max + (this.actor.system.attributes.hp.tempmax ?? 0)}`,
-                            color: hpMaxColor,
-                        },
-                        {
-                            text: HPText,
-                        },
-                    ],
-                    [
-                        {
-                            text: ACText,
-                        },
-                        {
-                            text: this.actor.system.attributes.ac.value,
-                            color: "var(--ech-movement-baseMovement-background)",
-                        },
-                    ],
-                ];
+                if (isStarship) {
+                    const hpColor = "rgb(0 255 170)";
+                    const hpMaxColor = "rgb(255 255 255)";
+                    const spColor = "#6698f3";
+                    const spMaxColor = "rgb(222 91 255)";
+                    const SPText = game.i18n
+                        .localize("SW5E.ShieldPoints")
+                        .split(" ")
+                        .map((word) => word.charAt(0).toUpperCase())
+                        .join("");
+                    const DRText = game.i18n
+                        .localize("SW5E.DmgRed")
+                        .split(" ")
+                        .map((word) => word.charAt(0).toUpperCase())
+                        .join("");
+                    return [
+                        [
+                            {
+                                text: `${this.actor.system.attributes.hp.value}`,
+                                color: hpColor,
+                            },
+                            {
+                                text: `/`,
+                            },
+                            {
+                                text: `${this.actor.system.attributes.hp.max}`,
+                                color: hpMaxColor,
+                            },
+                            {
+                                text: HPText,
+                            },
+                        ],
+                        [
+                            {
+                                text: `${(this.actor.system.attributes.hp.temp ?? 0)}`,
+                                color: spColor,
+                            },
+                            {
+                                text: `/`,
+                            },
+                            {
+                                text: `${(this.actor.system.attributes.hp.tempmax ?? 0)}`,
+                                color: spMaxColor,
+                            },
+                            {
+                                text: SPText,
+                            },
+                        ],
+                        [
+                            {
+                                text: ACText,
+                            },
+                            {
+                                text: this.actor.system.attributes.ac.value,
+                                color: "var(--ech-movement-baseMovement-background)",
+                            },
+                        ],
+                        [
+                            {
+                                text: DRText,
+                            },
+                            {
+                                text: this.actor.system.attributes.equip?.armor?.dr ?? 0,
+                                color: "var(--ech-movement-baseMovement-background)",
+                            },
+                        ],
+                    ];
+                } else {
+                    const hpColor = this.actor.system.attributes.hp.temp ? "#6698f3" : "rgb(0 255 170)";
+                    const tempMax = this.actor.system.attributes.hp.tempmax;
+                    const hpMaxColor = tempMax ? (tempMax > 0 ? "rgb(222 91 255)" : "#ffb000") : "rgb(255 255 255)";
+                    return [
+                        [
+                            {
+                                text: `${this.actor.system.attributes.hp.value + (this.actor.system.attributes.hp.temp ?? 0)}`,
+                                color: hpColor,
+                            },
+                            {
+                                text: `/`,
+                            },
+                            {
+                                text: `${this.actor.system.attributes.hp.max + (this.actor.system.attributes.hp.tempmax ?? 0)}`,
+                                color: hpMaxColor,
+                            },
+                            {
+                                text: HPText,
+                            },
+                        ],
+                        [
+                            {
+                                text: ACText,
+                            },
+                            {
+                                text: this.actor.system.attributes.ac.value,
+                                color: "var(--ech-movement-baseMovement-background)",
+                            },
+                        ],
+                    ];
+                }
             }
         }
 
@@ -354,7 +429,7 @@ export function initConfig() {
                     return new SW5eDrawerButton(
                         [
                             {
-                                label: getProficiencyIcon(skillData.proficient) + CONFIG.SW5E.skills[skill].label,
+                                label: getProficiencyIcon(skillData.proficient) + CONFIG.SW5E.allSkills[skill].label,
                                 onClick: (event) => this.actor.rollSkill(skill, { event }),
                             },
                             {
@@ -452,35 +527,51 @@ export function initConfig() {
             }
 
             _onNewRound(combat) {
+                if (this.actor.type === "starship") this.actor.regenRepair();
+
                 this.isActionUsed = false;
                 this.updateActionUse();
             }
 
             async _getButtons() {
-                const powerItems = this.actor.items.filter((item) => itemTypes.power.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
-                const maneuverItems = this.actor.items.filter((item) => itemTypes.maneuver.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
-                const featItems = this.actor.items.filter((item) => itemTypes.feat.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
-                const consumableItems = this.actor.items.filter((item) => itemTypes.consumable.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
-
-                const powerButton = !powerItems.length ? [] : [new SW5eButtonPanelButton({ type: "power", items: powerItems, color: 0 })].filter((button) => button.hasContents);
-
-                const specialActions = Object.values(ECHItems);
-
-                const showSpecialActions = game.settings.get(MODULE_ID, "showSpecialActions");
-                const makeSpecialActionButton = (idx => new SW5eSpecialActionButton(specialActions[idx]));
-                const makeSpecialActionButtons = (idxs => new ARGON.MAIN.BUTTONS.SplitButton(...idxs.map(makeSpecialActionButton)));
                 const buttons = [];
-
                 buttons.push(new SW5eItemButton({ item: null, isWeaponSet: true, isPrimary: true }));
-                if (showSpecialActions) buttons.push(makeSpecialActionButtons([0, 1]));
-                buttons.push(...powerButton);
-                if (showSpecialActions) buttons.push(makeSpecialActionButtons([2, 3]));
-                buttons.push(new SW5eButtonPanelButton({ type: "maneuver", items: maneuverItems, color: 0 }));
-                if (showSpecialActions) buttons.push(makeSpecialActionButtons([4, 5]));
-                buttons.push(new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 }));
-                if (showSpecialActions) buttons.push(makeSpecialActionButtons([6, 7]));
-                buttons.push(new SW5eButtonPanelButton({ type: "consumable", items: consumableItems, color: 0 }));
-                if (showSpecialActions) buttons.push(makeSpecialActionButtons([8, 9]));
+
+                if (this.actor.type === "starship") {
+                    const features = this.actor.items.filter((item) => itemTypes.feat.includes(item.type) && actionTypes.action.includes(item.system.activation?.type));
+                    const ssActions = features.filter((item) => item.system.type?.value === "starshipAction");
+                    const crewActions = ssActions.filter((item) => item.system.type.subtype === "crew");
+                    const pilotActions = ssActions.filter((item) => item.system.type.subtype === "pilot");
+                    const ssFeatures = features.filter((item) => item.system.type?.value !== "starshipAction" || (!["crew", "pilot"].includes(item.system.type.subtype)));
+                    const activableItems = this.actor.items.filter((item) => ![...itemTypes.feat, "weapon"].includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && item.system.equipped);
+                    buttons.push(new SW5eButtonPanelButton({ type: "crew-action", items: crewActions, color: 0 }));
+                    buttons.push(new SW5eButtonPanelButton({ type: "pilot-action", items: pilotActions, color: 0 }));
+                    buttons.push(new SW5eButtonPanelButton({ type: "feat", items: ssFeatures, color: 0 }));
+                    buttons.push(new SW5eButtonPanelButton({ type: "item", items: activableItems, color: 0 }));
+                } else {
+                    const powerItems = this.actor.items.filter((item) => itemTypes.power.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
+                    const maneuverItems = this.actor.items.filter((item) => itemTypes.maneuver.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
+                    const featItems = this.actor.items.filter((item) => itemTypes.feat.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
+                    const consumableItems = this.actor.items.filter((item) => itemTypes.consumable.includes(item.type) && actionTypes.action.includes(item.system.activation?.type) && !CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value));
+
+                    const powerButton = !powerItems.length ? [] : [new SW5eButtonPanelButton({ type: "power", items: powerItems, color: 0 })].filter((button) => button.hasContents);
+
+                    const specialActions = Object.values(ECHItems);
+
+                    const showSpecialActions = game.settings.get(MODULE_ID, "showSpecialActions");
+                    const makeSpecialActionButton = (idx => new SW5eSpecialActionButton(specialActions[idx]));
+                    const makeSpecialActionButtons = (idxs => new ARGON.MAIN.BUTTONS.SplitButton(...idxs.map(makeSpecialActionButton)));
+
+                    if (showSpecialActions) buttons.push(makeSpecialActionButtons([0, 1]));
+                    buttons.push(...powerButton);
+                    if (showSpecialActions) buttons.push(makeSpecialActionButtons([2, 3]));
+                    buttons.push(new SW5eButtonPanelButton({ type: "maneuver", items: maneuverItems, color: 0 }));
+                    if (showSpecialActions) buttons.push(makeSpecialActionButtons([4, 5]));
+                    buttons.push(new SW5eButtonPanelButton({ type: "feat", items: featItems, color: 0 }));
+                    if (showSpecialActions) buttons.push(makeSpecialActionButtons([6, 7]));
+                    buttons.push(new SW5eButtonPanelButton({ type: "consumable", items: consumableItems, color: 0 }));
+                    if (showSpecialActions) buttons.push(makeSpecialActionButtons([8, 9]));
+                }
 
                 const barItems = this.actor.items.filter((item) => CoreHUD.SW5E.mainBarFeatures.includes(item.system.type?.value) && actionTypes.action.includes(item.system.activation?.type));
                 buttons.push(...condenseItemButtons(barItems));
@@ -646,7 +737,7 @@ export function initConfig() {
             }
 
             get currentActions() {
-                return this.actor.system.resources.lair?.value * 1;
+                return (this.actor.system.resources?.lair?.value ?? 0) * 1;
             }
 
             async _getButtons() {
@@ -700,6 +791,36 @@ export function initConfig() {
                 const tooltipData = await getTooltipDetails(this.item);
                 tooltipData.propertiesLabel = "enhancedcombathud-sw5e.tooltip.properties.name";
                 return tooltipData;
+            }
+
+            async _onTooltipMouseEnter(event) {
+                super._onTooltipMouseEnter(event);
+
+                const item = this.item;
+                console.debug("_onTooltipMouseEnter", item?.system?.firingArc, item?.system?.range?.value, item?.firingArcTemplate);
+                console.debug(this.token.document);
+                if (item?.system?.firingArc && item.system.range?.value && !item.firingArcTemplate) {
+                  try {
+                    item.firingArcTemplate = game.sw5e.canvas.FiringArcTemplate.fromItem(item, { token: this.token.document });
+                    item.firingArcTemplate?.drawPreview();
+                  } catch(err) {
+                    Hooks.onError("ActorSheet5eStarship._onMouseOverItem", err, {
+                      msg: game.i18n.localize("SW5E.PlaceTemplateError"),
+                      log: "error",
+                      notify: "error"
+                    });
+                  }
+                }
+            }
+
+            async _onTooltipMouseLeave(event) {
+                super._onTooltipMouseLeave(event);
+
+                const item = this.item;
+                if (item?.firingArcTemplate) {
+                  item.firingArcTemplate._onCancelPlacement(event);
+                  item.firingArcTemplate = undefined;
+                }
             }
 
             async _onMouseUp(event) {
@@ -768,7 +889,7 @@ export function initConfig() {
                 const consumeType = this.item.system.consume?.type;
                 if (this.item.hasAmmo) {
                     const ammo = this.item.getAmmo;
-                    if (!ammo.item) return null;
+                    if (!ammo.max) return null;
                     return Math.floor(ammo.quantity / ammo.consumeAmount);
                 } else if (consumeType === "attribute") {
                     return Math.floor(getProperty(this.actor.system, this.item.system.consume.target) / this.item.system.consume.amount);
@@ -824,7 +945,12 @@ export function initConfig() {
                     case "feat":
                         return "enhancedcombathud-sw5e.hud.usefeature.name";
                     case "consumable":
+                    case "item":
                         return "enhancedcombathud-sw5e.hud.useitem.name";
+                    case "crew-action":
+                        return "enhancedcombathud-sw5e.hud.crew-action.name";
+                    case "pilot-action":
+                        return "enhancedcombathud-sw5e.hud.pilot-action.name";
                 }
             }
 
@@ -835,9 +961,14 @@ export function initConfig() {
                     case "maneuver":
                         return "modules/enhancedcombathud-sw5e/icons/acrobatic.webp";
                     case "feat":
+                    case "crew-action":
                         return "modules/enhancedcombathud/icons/mighty-force.webp";
+                    case "pilot-action":
+                        return "modules/enhancedcombathud-sw5e/icons/ship-wheel.webp";
                     case "consumable":
                         return "modules/enhancedcombathud/icons/drink-me.webp";
+                    case "item":
+                        return "modules/enhancedcombathud-sw5e/icons/energise.webp";
                 }
             }
 
@@ -1047,7 +1178,8 @@ export function initConfig() {
             }
 
             get movementMode() {
-                return this.getMovementMode ? this.getMovementMode(this.token) : 'walk';
+                const isStarship = this.actor.type === "starship";
+                return this.getMovementMode ? this.getMovementMode(this.token) : isStarship ? 'space' : 'walk';
             }
 
             get movementMax() {
@@ -1066,7 +1198,24 @@ export function initConfig() {
             }
 
             async _getButtons() {
-                return [
+                const isStarship = this.actor.type === "starship";
+                return isStarship ? [
+                    {
+                        label: "SW5E.Refitting",
+                        onClick: (event) => this.actor.refittingRepair(),
+                        icon: "fas fa-screwdriver-wrench",
+                    },
+                    {
+                        label: "SW5E.Recharge",
+                        onClick: (event) => this.actor.rechargeRepair(),
+                        icon: "fas fa-battery-bolt",
+                    },
+                    {
+                        label: "SW5E.Regen",
+                        onClick: (event) => this.actor.regenRepair(),
+                        icon: "fas fa-shield-plus",
+                    }
+                ] : [
                     {
                         label: "SW5E.LongRest",
                         onClick: (event) => this.actor.longRest(),
@@ -1118,7 +1267,7 @@ export function initConfig() {
 
             async _onSetChange({ sets, active }) {
                 const switchEquip = game.settings.get("enhancedcombathud-sw5e", "switchEquip");
-                if (!switchEquip) return;
+                if (!switchEquip || this.actor.type === "starship") return;
                 const updates = [];
                 const activeSet = sets[active];
                 const activeItems = Object.values(activeSet).filter((item) => item);
@@ -1140,7 +1289,7 @@ export function initConfig() {
         CoreHUD.defineMovementHud(SW5eMovementHud);
         CoreHUD.defineButtonHud(SW5eButtonHud);
         CoreHUD.defineWeaponSets(SW5eWeaponSets);
-        CoreHUD.defineSupportedActorTypes(["character", "npc"]);
+        CoreHUD.defineSupportedActorTypes(["character", "npc", "starship"]);
     });
 }
 
